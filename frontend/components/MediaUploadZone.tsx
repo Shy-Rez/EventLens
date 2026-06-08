@@ -87,7 +87,10 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
         try {
           const img = document.createElement('img');
           img.src = URL.createObjectURL(file);
-          await new Promise((res) => { img.onload = res; });
+          await new Promise((resolve, reject) => { 
+            img.onload = resolve; 
+            img.onerror = () => reject(new Error("Image decode failed"));
+          });
           
           const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
           
