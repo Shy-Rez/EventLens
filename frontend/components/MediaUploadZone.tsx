@@ -121,8 +121,12 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
         const formData = new FormData();
         
         batchFiles.forEach((file) => formData.append("media", file));
+        
+        // Use an ordered array for vectors to avoid filename mismatch bugs (e.g. spaces/special chars)
+        const batchVectors = batchFiles.map(file => faceVectorsData[file.name] || null);
+        
         formData.append("eventId", eventId);
-        formData.append("faceVectors", JSON.stringify(faceVectorsData));
+        formData.append("faceVectors", JSON.stringify(batchVectors));
 
         const res = await fetch("https://eventlens-backend-cufi.onrender.com/api/upload", {
           method: "POST",

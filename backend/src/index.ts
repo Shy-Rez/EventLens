@@ -166,7 +166,7 @@ app.post('/api/upload', upload.array('media', 500), async (req, res): Promise<an
   try {
     const files = req.files as Express.Multer.File[];
     const { eventId } = req.body;
-    const faceVectors = req.body.faceVectors ? JSON.parse(req.body.faceVectors) : {};
+    const faceVectors = req.body.faceVectors ? JSON.parse(req.body.faceVectors) : [];
     
     if (!files || files.length === 0) return res.status(400).json({ success: false, message: 'No files provided.' });
     if (!eventId) return res.status(400).json({ success: false, message: 'Event ID is required.' });
@@ -185,7 +185,9 @@ app.post('/api/upload', upload.array('media', 500), async (req, res): Promise<an
     const moderated = [];
     const bannedTags = ['weapon', 'violence', 'blood', 'gore', 'nudity', 'explicit', 'gun', 'knife'];
 
+    let fileIndex = 0;
     for (const file of files) {
+      const currentFileIndex = fileIndex++;
       const fileHash = crypto.createHash('md5').update(file.buffer).digest('hex');
       const hiddenHashTag = `hash_${fileHash}`; 
 
@@ -261,8 +263,8 @@ app.post('/api/upload', upload.array('media', 500), async (req, res): Promise<an
 
       aiTags.push(hiddenHashTag);
 
-      if (faceVectors[file.originalname]) {
-        const vectorStr = `face_vector:${faceVectors[file.originalname].join(',')}`;
+      if (faceVectors[currentFileIndex]) {
+        const vectorStr = `face_vector:${faceVectors[currentFileIndex].join(',')}`;
         aiTags.push(vectorStr);
       }
 
