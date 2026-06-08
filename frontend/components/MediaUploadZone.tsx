@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function MediaUploadZone({ eventId }: { eventId: string }) {
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [uploadReport, setUploadReport] = useState<{
     success: boolean;
     count?: number;
@@ -33,12 +34,31 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
     }
   });
 
-  // AI Model loading removed from upload zone
+  // Load models from standard stable CDN
+  useEffect(() => {
+    const loadModels = async () => {
+      try {
+        const faceapi = await import("@vladmandic/face-api");
+        const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+        
+        await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+        
+        setIsModelLoaded(true);
+        console.log("AI Models Loaded from CDN!");
+      } catch (e) {
+        console.error("Failed to load models", e);
+      }
+    };
+    loadModels();
+  }, []);
 
   // Upload Handler with full state report mappings
   const handleUpload = async () => {
     if (files.length === 0) return;
     setIsUploading(true);
+    const faceapi = await import("@vladmandic/face-api");
 
     const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
 
@@ -59,8 +79,33 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
     let finalModerated: string[] = [];
     let uploadFailed = false;
 
-    // SCAN FACES BEFORE UPLOAD REMOVED
+    // SCAN FACES BEFORE UPLOAD
     const faceVectorsData: Record<string, number[]> = {};
+    
+    for (const file of validMediaFiles) {
+      if (file.type.startsWith('image/')) {
+        try {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(file);
+          await new Promise((resolve, reject) => { 
+            img.onload = resolve; 
+            img.onerror = () => reject(new Error("Image decode failed"));
+          });
+          
+          const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+          
+          if (detection) {
+            faceVectorsData[file.name] = Array.from(detection.descriptor);
+            console.log(`[ML SUCCESS] Extracted real 128D vector for ${file.name}`);
+          } else {
+            // NO FAKE FALLBACKS. If the AI doesn't see a face, we don't save a vector.
+            console.warn(`[ML WARNING] No human face detected in ${file.name}. It will upload, but won't be searchable by face.`);
+          }
+        } catch (e) {
+          console.error("Face scan failed entirely for", file.name, e);
+        }
+      }
+    }
 
     const BATCH_SIZE = 2; 
     
