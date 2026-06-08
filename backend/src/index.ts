@@ -750,10 +750,19 @@ app.get('/api/analytics', async (req, res): Promise<any> => {
 });
 
 // ==========================================
-// 8. REAL AI FACIAL SEARCH (PURE EUCLIDEAN MATH)
+// 8. REAL AI FACIAL SEARCH (COSINE SIMILARITY MATH)
 // ==========================================
-const euclideanDistance = (vecA: number[], vecB: number[]) => {
-  return Math.sqrt(vecA.reduce((sum, a, i) => sum + Math.pow(a - vecB[i], 2), 0));
+const cosineSimilarity = (vecA: number[], vecB: number[]) => {
+  let dotProduct = 0;
+  let normA = 0;
+  let normB = 0;
+  for (let i = 0; i < vecA.length; i++) {
+    dotProduct += vecA[i] * vecB[i];
+    normA += vecA[i] * vecA[i];
+    normB += vecB[i] * vecB[i];
+  }
+  if (normA === 0 || normB === 0) return 0;
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 };
 
 app.post(['/api/search/face', '/api/ai-search/face'], async (req: any, res: any): Promise<any> => {
@@ -778,26 +787,32 @@ app.post(['/api/search/face', '/api/ai-search/face'], async (req: any, res: any)
       
       if (vectorTag) {
         const dbVector = vectorTag.split(':')[1].split(',').map(Number);
-        const distance = euclideanDistance(vector, dbVector);
+        
+        // Use Cosine Similarity instead of Euclidean Distance
+        // Cosine Similarity is highly resilient to lighting and camera changes
+        const similarity = cosineSimilarity(vector, dbVector);
 
-        if (distance <= 0.6) {
-          const confidence = ((1 - (distance / 1.5)) * 100).toFixed(1);
+        // A threshold of 0.75 is generous enough to catch matches in different lighting,
+        // but strict enough to filter out completely different people.
+        if (similarity >= 0.75) {
+          const confidence = (similarity * 100).toFixed(1);
           
           validMatches.push({
             ...media,
-            distance: distance,
+            similarity: similarity,
             matchConfidence: confidence
           });
         }
       }
     }
 
-    validMatches.sort((a, b) => a.distance - b.distance);
+    // Sort by highest similarity first
+    validMatches.sort((a, b) => b.similarity - a.similarity);
 
     return res.status(200).json({ 
       success: true, 
       message: `Found ${validMatches.length} true biometric matches.`, 
-      matches: validMatches.slice(0, 10)
+      matches: validMatches.slice(0, 15) // Return up to 15 best matches
     });
 
   } catch (error) {
