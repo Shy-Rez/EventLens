@@ -180,7 +180,7 @@ app.post('/api/upload', upload.array('media', 500), async (req, res): Promise<an
     const targetAlbumId = event.albums[0].id;
     const existingMedia = await prisma.media.findMany({ where: { albumId: targetAlbumId } });
 
-    const uploadedMediaData = [];
+    const uploadedMediaData: any[] = [];
     const duplicates = [];
     const moderated = [];
     const bannedTags = ['weapon', 'violence', 'blood', 'gore', 'nudity', 'explicit', 'gun', 'knife'];
