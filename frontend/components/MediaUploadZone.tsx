@@ -38,8 +38,8 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
   useEffect(() => {
     const loadModels = async () => {
       try {
-        const faceapi = await import("@vladmandic/face-api");
-        const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+        const faceapi = await import("face-api.js");
+        const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights'; 
         
         await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
         await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
@@ -57,8 +57,12 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
   // Upload Handler with full state report mappings
   const handleUpload = async () => {
     if (files.length === 0) return;
+    if (!isModelLoaded) {
+      alert("AI Models are still initializing. Please wait a few seconds and try again.");
+      return;
+    }
     setIsUploading(true);
-    const faceapi = await import("@vladmandic/face-api");
+    const faceapi = await import("face-api.js");
 
     const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
 
