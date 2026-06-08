@@ -37,7 +37,7 @@ export default function AlbumsPage() {
 
     try {
       setIsLoading(true);
-      const res = await fetch(`http://localhost:5000/api/events?role=${role.toUpperCase()}`);
+      const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/events?role=${role.toUpperCase()}`);
       
       if (!res.ok) throw new Error("Network route unavailable.");
       const data = await res.json();

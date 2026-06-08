@@ -24,7 +24,7 @@ export default function MediaGallery({ eventId }: { eventId: string }) {
   useEffect(() => {
     const fetchMedia = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/events/${eventId}/media`);
+        const response = await fetch(`https://eventlens-backend-cufi.onrender.com/api/events/${eventId}/media`);
         const data = await response.json();
         if (data.success) {
           setMedia(data.media);

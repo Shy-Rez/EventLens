@@ -75,7 +75,7 @@ export default function AIFaceFinderPage() {
       setStatusMessage("Selfie embedded successfully. Querying database matrix...");
 
       // 2. Send the 128D vector to your new Backend Route
-      const response = await fetch('http://localhost:5000/api/search/face', {
+      const response = await fetch('https://eventlens-backend-cufi.onrender.com/api/search/face', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ vector: vectorArray })

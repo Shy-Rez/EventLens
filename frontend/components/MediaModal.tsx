@@ -18,7 +18,7 @@ export default function MediaModal({ media, isOpen, onClose }: MediaModalProps) 
   // Fetch comments when modal opens
   useEffect(() => {
     if (isOpen && media) {
-      fetch(`http://localhost:5000/api/media/${media.id}/comments`)
+      fetch(`https://eventlens-backend-cufi.onrender.com/api/media/${media.id}/comments`)
         .then(res => res.json())
         .then(data => { if (data.success) setComments(data.comments); });
     }
@@ -26,14 +26,14 @@ export default function MediaModal({ media, isOpen, onClose }: MediaModalProps) 
 
   const toggleLike = async () => {
     setIsLiked(!isLiked);
-    await fetch(`http://localhost:5000/api/media/${media.id}/like`, { method: "POST" });
+    await fetch(`https://eventlens-backend-cufi.onrender.com/api/media/${media.id}/like`, { method: "POST" });
   };
 
   const postComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
-    const res = await fetch(`http://localhost:5000/api/media/${media.id}/comment`, {
+    const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/media/${media.id}/comment`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: newComment })

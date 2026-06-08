@@ -18,7 +18,7 @@ export default function AccessControlPage() {
   // Fetch Users
   const fetchUsers = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/users");
+      const res = await fetch("https://eventlens-backend-cufi.onrender.com/api/users");
       const data = await res.json();
       if (data.success) {
         const sorted = data.users.sort((a: any, b: any) => {
@@ -42,7 +42,7 @@ export default function AccessControlPage() {
   // Handle Role Change
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${userId}/role`, {
+      const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/users/${userId}/role`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role: newRole }),
@@ -63,7 +63,7 @@ export default function AccessControlPage() {
     if (!confirm("Are you sure you want to permanently delete this user?")) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${userId}`, {
+      const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/users/${userId}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -81,7 +81,7 @@ export default function AccessControlPage() {
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/api/users", {
+      const res = await fetch("https://eventlens-backend-cufi.onrender.com/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 

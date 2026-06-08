@@ -33,7 +33,7 @@ export default function EventUploadStudioPage() {
       try {
         setIsLoading(true);
         // Forward uppercase credentials parameter straight into backend filtration queries
-        const res = await fetch(`http://localhost:5000/api/events/${eventId}?role=${role.toUpperCase()}`);
+        const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/events/${eventId}?role=${role.toUpperCase()}`);
         const data = await res.json();
         
         if (data.success) {
@@ -60,7 +60,7 @@ export default function EventUploadStudioPage() {
     if (!confirm("Are you sure you want to permanently delete this file?")) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/media/${mediaId}`, { method: 'DELETE' });
+      const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/media/${mediaId}`, { method: 'DELETE' });
       const data = await res.json();
       
       if (data.success) {

@@ -9,7 +9,7 @@ export default function NotificationToasts() {
 
   useEffect(() => {
     // Connect to the real-time SSE stream on your backend
-    const eventSource = new EventSource(`http://localhost:5000/api/notifications/stream/demo-user-id`);
+    const eventSource = new EventSource(`https://eventlens-backend-cufi.onrender.com/api/notifications/stream/demo-user-id`);
 
     eventSource.onmessage = (event) => {
       try {

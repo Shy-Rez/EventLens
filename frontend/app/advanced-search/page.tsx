@@ -22,7 +22,7 @@ export default function AdvancedSearchPage() {
 
       try {
         setIsLoading(true);
-        const res = await fetch(`http://localhost:5000/api/events?role=${role.toUpperCase()}`);
+        const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/events?role=${role.toUpperCase()}`);
         const data = await res.json();
         
         if (data.success) {

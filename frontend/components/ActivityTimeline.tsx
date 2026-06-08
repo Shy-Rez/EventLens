@@ -23,7 +23,7 @@ export default function ActivityTimelineTab() {
     const fetchActivities = async () => {
       try {
         // Fetching from your local backend
-        const res = await fetch("http://localhost:5000/api/activity");
+        const res = await fetch("https://eventlens-backend-cufi.onrender.com/api/activity");
         const data = await res.json();
         
         if (data.success) {

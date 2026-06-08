@@ -51,7 +51,7 @@ export default function EditAlbumModal({ isOpen, onClose, album, onUpdateSuccess
     setErrorMessage("");
 
     try {
-      const res = await fetch(`http://localhost:5000/api/albums/${album.id}`, {
+      const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/albums/${album.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, name: title, description, category, isPrivate }),

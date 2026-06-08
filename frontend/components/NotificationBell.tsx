@@ -13,7 +13,7 @@ export default function NotificationBell() {
 
   useEffect(() => {
     // Connect to our Backend Server-Sent Events stream
-    const eventSource = new EventSource(`http://localhost:5000/api/notifications/stream/${userId}`);
+    const eventSource = new EventSource(`https://eventlens-backend-cufi.onrender.com/api/notifications/stream/${userId}`);
 
     eventSource.onmessage = (event) => {
       try {

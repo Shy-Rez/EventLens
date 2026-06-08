@@ -31,7 +31,7 @@ export default function DashboardPage() {
 
       // 1. Fetch Admin Analytics (Includes Total Likes)
       if (isAdmin) {
-        fetch("http://localhost:5000/api/analytics")
+        fetch("https://eventlens-backend-cufi.onrender.com/api/analytics")
           .then(res => res.json())
           .then(data => { 
             if (data.success) setStats(data.stats); 
@@ -39,14 +39,14 @@ export default function DashboardPage() {
       }
 
       // 2. Fetch Recent Event Vaults
-      fetch(`http://localhost:5000/api/events?role=${role}`)
+      fetch(`https://eventlens-backend-cufi.onrender.com/api/events?role=${role}`)
         .then(res => res.json())
         .then(data => { 
           if (data.success) setRecentEvents(data.events.slice(0, 3)); 
         });
 
       // 3. 🚀 THE FIX: Fetch the Global Activity Feed (Recently Uploaded Media)
-      fetch(`http://localhost:5000/api/activity`)
+      fetch(`https://eventlens-backend-cufi.onrender.com/api/activity`)
         .then(res => res.json())
         .then(data => {
           if (data.success) setRecentActivity(data.activities);

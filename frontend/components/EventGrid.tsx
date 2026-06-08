@@ -15,7 +15,7 @@ export default function EventGrid() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/events");
+        const res = await fetch("https://eventlens-backend-cufi.onrender.com/api/events");
         const data = await res.json();
         if (data.success) {
           // Sort events so the newest ones appear first

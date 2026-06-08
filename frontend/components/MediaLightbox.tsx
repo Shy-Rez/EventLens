@@ -59,7 +59,7 @@ export default function MediaLightbox({ media, onClose }: { media: any, onClose:
       try {
         // 🚀 THE FIX: Use real user ID (or empty string if guest)
         const userId = currentUser?.id || ""; 
-        const res = await fetch(`http://localhost:5000/api/media/${media.id}/interactions?userId=${userId}`);
+        const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/media/${media.id}/interactions?userId=${userId}`);
         const data = await res.json();
         
         if (data.success) {
@@ -86,7 +86,7 @@ export default function MediaLightbox({ media, onClose }: { media: any, onClose:
     setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
 
     try {
-      const res = await fetch(`http://localhost:5000/api/media/${media.id}/like`, {
+      const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/media/${media.id}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // 🚀 THE FIX: Send the ACTUAL User ID
@@ -132,7 +132,7 @@ export default function MediaLightbox({ media, onClose }: { media: any, onClose:
     setComments((prev) => [...prev, optimisticComment]);
     
     try {
-      const res = await fetch(`http://localhost:5000/api/media/${media.id}/comment`, {
+      const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/media/${media.id}/comment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // 🚀 THE FIX: Send the ACTUAL User ID along with the content

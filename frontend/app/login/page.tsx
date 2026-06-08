@@ -24,7 +24,7 @@ export default function LoginPage() {
     console.log(`[Login Attempt] Sending -> Email: ${loginEmail}, Password: ${loginPassword}`);
 
     try {
-      const res = await fetch("http://localhost:5000/api/login", {
+      const res = await fetch("https://eventlens-backend-cufi.onrender.com/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: loginEmail, password: loginPassword }),

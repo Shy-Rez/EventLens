@@ -115,7 +115,7 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
         formData.append("eventId", eventId);
         formData.append("faceVectors", JSON.stringify(faceVectorsData));
 
-        const res = await fetch("http://localhost:5000/api/upload", {
+        const res = await fetch("https://eventlens-backend-cufi.onrender.com/api/upload", {
           method: "POST",
           body: formData,
         });
