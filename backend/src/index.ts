@@ -14,10 +14,10 @@ const PORT = process.env.PORT || 5000;
 
 // --- 1. Middleware & Configurations ---
 const corsOptions = {
-  origin: 'http://localhost:3000', // <-- Set to your exact frontend URL
+  origin: '*', // Allow all origins for the API
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
+  credentials: false, // Must be false when origin is '*'
   preflightContinue: false,
   optionsSuccessStatus: 204,
 };
