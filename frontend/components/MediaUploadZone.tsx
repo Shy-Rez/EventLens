@@ -86,15 +86,17 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
     // SCAN FACES BEFORE UPLOAD
     const faceVectorsData: Record<string, number[]> = {};
     
-    for (const file of validMediaFiles) {
+    for (let i = 0; i < validMediaFiles.length; i++) {
+      const file = validMediaFiles[i];
       if (file.type.startsWith('image/')) {
         try {
-          const img = document.createElement('img');
-          img.src = URL.createObjectURL(file);
-          await new Promise((resolve, reject) => { 
-            img.onload = resolve; 
-            img.onerror = () => reject(new Error("Image decode failed"));
-          });
+          // Grab the already-rendered preview thumbnail from the DOM
+          // This ensures the image is scaled and has valid client dimensions, preventing face-api from failing on massive 4K photos.
+          const img = document.getElementById(`upload-preview-${i}`) as HTMLImageElement;
+          if (!img) {
+             console.warn("Could not find preview image in DOM for", file.name);
+             continue;
+          }
           
           const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
           
@@ -193,7 +195,7 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
               return (
                 <div key={i} className="relative bg-white/5 border border-white/10 rounded-xl aspect-square flex items-center justify-center overflow-hidden group">
                   {isImage ? (
-                    <img src={objectUrl!} alt="Preview asset container element" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-300 group-hover:scale-110" />
+                    <img id={`upload-preview-${i}`} src={objectUrl!} crossOrigin="anonymous" alt="Preview asset container element" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-300 group-hover:scale-110" />
                   ) : (
                     <div className="flex flex-col items-center">
                        <File className="w-6 h-6 text-blue-400 mb-1" />
