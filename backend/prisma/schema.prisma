@@ -1,0 +1,124 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // Make sure this line exists if it wasn't there before!
+}
+
+model User {
+  id              String         @id @default(uuid())
+  email           String         @unique
+  passwordHash    String
+  name            String
+  avatarUrl       String?
+  role            Role           @default(VIEWER)
+  referenceSelfie String?
+  faceEmbedding   Float[]
+  createdAt       DateTime       @default(now())
+  comments        Comment[]
+  eventsCreated   Event[]
+  likes           Like[]
+  mediaUploaded   Media[]
+  notifications   Notification[]
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  date        DateTime
+  category    String
+  coverImage  String?
+  creatorId   String
+  createdAt   DateTime @default(now())
+  albums      Album[]
+  creator     User     @relation(fields: [creatorId], references: [id])
+}
+
+model Album {
+  id        String   @id @default(uuid())
+  title     String
+  isPublic  Boolean  @default(true)
+  eventId   String
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  media     Media[]
+}
+
+model Media {
+  id            String      @id @default(uuid())
+  url           String
+  thumbnailUrl  String
+  type          MediaType
+  tags          String[]    @default([]) // FIXED: Native PostgreSQL Array for AI Tags
+  uploaderId    String
+  albumId       String
+  aiCaption     String?
+  createdAt     DateTime    @default(now())
+  comments      Comment[]
+  detectedFaces FaceMatch[]
+  likes         Like[]
+  album         Album       @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  uploader      User        @relation(fields: [uploaderId], references: [id])
+}
+
+model FaceMatch {
+  id            String  @id @default(uuid())
+  mediaId       String
+  matchedUserId String?
+  confidence    Float
+  media         Media   @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+}
+
+// --- UPDATED SOCIAL MODELS ---
+
+model Comment {
+  id        String   @id @default(uuid())
+  text      String
+  mediaId   String
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  userId    String   
+  user      User     @relation(fields: [userId], references: [id]) // ADDED THIS
+  userName  String   
+  createdAt DateTime @default(now())
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  mediaId   String
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  userId    String   
+  user      User     @relation(fields: [userId], references: [id]) // ADDED THIS
+  createdAt DateTime @default(now())
+
+  @@unique([mediaId, userId]) 
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   
+  user      User     @relation(fields: [userId], references: [id]) // ADDED THIS
+  type      String   
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// Add these relationship arrays to your existing Media model:
+// comments  Comment[]
+// likes     Like[]
+
+enum Role {
+  ADMIN
+  PHOTOGRAPHER
+  CLUB_MEMBER
+  VIEWER
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
