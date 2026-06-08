@@ -90,13 +90,16 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
       const file = validMediaFiles[i];
       if (file.type.startsWith('image/')) {
         try {
-          // Grab the already-rendered preview thumbnail from the DOM
-          // This ensures the image is scaled and has valid client dimensions, preventing face-api from failing on massive 4K photos.
-          const img = document.getElementById(`upload-preview-${i}`) as HTMLImageElement;
-          if (!img) {
-             console.warn("Could not find preview image in DOM for", file.name);
-             continue;
-          }
+          // As requested: Taking the time to scan the FULL RESOLUTION image in memory
+          // instead of the tiny preview thumbnail. This ensures the AI can accurately
+          // detect faces even if they are small or the image is a wide group shot.
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(file);
+          
+          await new Promise((resolve, reject) => { 
+            img.onload = resolve; 
+            img.onerror = () => reject(new Error("Image decode failed"));
+          });
           
           const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
           
@@ -104,7 +107,6 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
             faceVectorsData[file.name] = Array.from(detection.descriptor);
             console.log(`[ML SUCCESS] Extracted real 128D vector for ${file.name}`);
           } else {
-            // NO FAKE FALLBACKS. If the AI doesn't see a face, we don't save a vector.
             console.warn(`[ML WARNING] No human face detected in ${file.name}. It will upload, but won't be searchable by face.`);
           }
         } catch (e) {
