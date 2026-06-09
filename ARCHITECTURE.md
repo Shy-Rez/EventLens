@@ -1,6 +1,6 @@
 # Architecture Diagram
 
-This document outlines the architecture, data flows, and infrastructure design for the **Event & Media Management Platform**. The system is built as a decoupled, full-stack SaaS application emphasizing scalable cloud storage, real-time event-driven interactions, and AI processing.
+This document outlines the architecture, data flows, and infrastructure design for the **EventLens Platform**. The system is built as a decoupled, full stack SaaS application emphasizing scalable cloud storage, real time event driven interactions, and AI processing.
 
 ## System Architecture
 
