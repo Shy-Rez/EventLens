@@ -1,6 +1,6 @@
 # Database Schema 
 
-This document outlines the PostgreSQL database schema for the **Event & Media Management Platform**, managed via the **Prisma ORM**. The schema is designed to support scalable media storage, Role-Based Access Control (RBAC), Social Interactions, and AI-powered workflows (Facial Recognition & Auto-Captioning).
+This document outlines the PostgreSQL database schema for the **EventLens Platform**, managed via the **Prisma ORM**. The schema is designed to support scalable media storage, Role-Based Access Control (RBAC), Social Interactions, and AI-powered workflows (Facial Recognition & Auto-Captioning).
 
 ## Entity Relationship Diagram (ERD) 
 
