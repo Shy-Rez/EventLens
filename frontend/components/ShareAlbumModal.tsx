@@ -16,9 +16,7 @@ export default function ShareAlbumModal({ isOpen, onClose, eventId, eventName }:
   const [isCollaborative, setIsCollaborative] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Generate the dynamic link based on the mode
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : "http://localhost:3000";
-  // If collaborative, append a secure invite token parameter
   const shareUrl = `${baseUrl}/albums/${eventId}${isCollaborative ? "?invite_token=collab_8f92a1" : "?view=public"}`;
 
   const handleCopy = () => {
@@ -38,13 +36,12 @@ export default function ShareAlbumModal({ isOpen, onClose, eventId, eventName }:
       >
         <motion.div 
           initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
-          onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+          onClick={(e) => e.stopPropagation()}
           className="bg-[#111] border border-white/10 p-8 rounded-3xl w-full max-w-md relative shadow-2xl overflow-hidden"
         >
-          {/* Background Glow */}
+
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-blue-600/20 blur-[60px] pointer-events-none" />
 
-          {/* Header */}
           <div className="flex justify-between items-start mb-6 relative z-10">
             <div>
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -57,7 +54,6 @@ export default function ShareAlbumModal({ isOpen, onClose, eventId, eventName }:
             </button>
           </div>
 
-          {/* Access Toggle (Viewer vs Collaborator) */}
           <div className="bg-black/50 border border-white/5 rounded-2xl p-2 flex relative mb-8 z-10">
             <button 
               onClick={() => setIsCollaborative(false)}
@@ -73,7 +69,6 @@ export default function ShareAlbumModal({ isOpen, onClose, eventId, eventName }:
             </button>
           </div>
 
-          {/* QR Code Display */}
           <div className="flex flex-col items-center mb-8 relative z-10">
             <div className="bg-white p-4 rounded-2xl shadow-xl mb-4 transition-all duration-300 transform hover:scale-105">
               <QRCodeCanvas 
@@ -81,7 +76,7 @@ export default function ShareAlbumModal({ isOpen, onClose, eventId, eventName }:
                 size={180} 
                 bgColor={"#ffffff"} 
                 fgColor={"#000000"} 
-                level={"H"} // High error correction
+                level={"H"} 
                 includeMargin={false}
               />
             </div>
@@ -92,7 +87,6 @@ export default function ShareAlbumModal({ isOpen, onClose, eventId, eventName }:
             </p>
           </div>
 
-          {/* Copy Link Input */}
           <div className="relative z-10">
             <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block ml-1">Share Link</label>
             <div className="flex items-center gap-2">

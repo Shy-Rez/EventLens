@@ -28,7 +28,6 @@ export default function EditAlbumModal({ isOpen, onClose, album, onUpdateSuccess
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Sync state fields whenever a fresh target album container is passed to the editing grid
   useEffect(() => {
     if (album) {
       setTitle(album.title || album.name || "");

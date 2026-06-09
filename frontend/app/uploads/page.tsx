@@ -14,7 +14,6 @@ export default function UploadsHubPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 🚀 THE FIX: A persistent tracker to ignore slow, overlapping "VIEWER" requests
   const activeRequest = useRef(0);
 
   useEffect(() => {
@@ -30,8 +29,7 @@ export default function UploadsHubPage() {
         setIsLoading(true);
         const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/events?role=${role.toUpperCase()}`);
         const data = await res.json();
-        
-        // 🔥 CRITICAL CHECK: Only update the screen if this is the MOST RECENT request
+
         if (data.success && requestId === activeRequest.current) {
           setEvents(data.events);
         }

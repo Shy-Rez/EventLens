@@ -8,18 +8,15 @@ export default function NotificationToasts() {
   const [notifications, setNotifications] = useState<any[]>([]);
 
   useEffect(() => {
-    // Connect to the real-time SSE stream on your backend
     const eventSource = new EventSource(`https://eventlens-backend-cufi.onrender.com/api/notifications/stream/demo-user-id`);
 
     eventSource.onmessage = (event) => {
       try {
         const newNotif = JSON.parse(event.data);
-        const localId = Date.now() + Math.random(); // Unique ID for the UI
+        const localId = Date.now() + Math.random();
         
-        // Add to the screen
         setNotifications((prev) => [...prev, { ...newNotif, localId }]);
 
-        // Auto-remove after 5 seconds
         setTimeout(() => {
           setNotifications((prev) => prev.filter((n) => n.localId !== localId));
         }, 5000);

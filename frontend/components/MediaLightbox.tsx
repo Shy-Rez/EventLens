@@ -8,7 +8,6 @@ export default function MediaLightbox({ media, onClose }: { media: any, onClose:
    const [currentUser, setCurrentUser] = useState<any>(null);
 
    useEffect(() => {
-     // Check for both your custom key and the standard 'user' key just in case
      const userStr = localStorage.getItem("eventmedia_user") || localStorage.getItem("user");
      if (userStr) {
        setCurrentUser(JSON.parse(userStr));
@@ -43,8 +42,7 @@ export default function MediaLightbox({ media, onClose }: { media: any, onClose:
       window.open(downloadUrl, '_blank');
     }
   };
-   
-  // State
+
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0); 
   const [isFavorited, setIsFavorited] = useState(false);
@@ -53,11 +51,9 @@ export default function MediaLightbox({ media, onClose }: { media: any, onClose:
   const [showTagInput, setShowTagInput] = useState(false);
   const [tagQuery, setTagQuery] = useState("");
 
-  // 🚀 FETCH REAL DATA ON LOAD (Now waits for currentUser to load)
   useEffect(() => {
     const fetchInteractionData = async () => {
       try {
-        // 🚀 THE FIX: Use real user ID (or empty string if guest)
         const userId = currentUser?.id || ""; 
         const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/media/${media.id}/interactions?userId=${userId}`);
         const data = await res.json();
@@ -77,7 +73,6 @@ export default function MediaLightbox({ media, onClose }: { media: any, onClose:
     }
   }, [media.id, currentUser]);
 
-  // 🚀 SEND LIKE TO DATABASE
   const handleLike = async () => {
     if (!currentUser) return alert("Please log in to like media!");
 
@@ -89,7 +84,6 @@ export default function MediaLightbox({ media, onClose }: { media: any, onClose:
       const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/media/${media.id}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // 🚀 THE FIX: Send the ACTUAL User ID
         body: JSON.stringify({ userId: currentUser.id }) 
       });
       
@@ -117,7 +111,6 @@ export default function MediaLightbox({ media, onClose }: { media: any, onClose:
     }
   };
 
-  // 🚀 Send the Comment to the database
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !currentUser) return;
@@ -135,7 +128,6 @@ export default function MediaLightbox({ media, onClose }: { media: any, onClose:
       const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/media/${media.id}/comment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // 🚀 THE FIX: Send the ACTUAL User ID along with the content
         body: JSON.stringify({ 
           userId: currentUser.id,
           content: commentText, 
@@ -177,14 +169,12 @@ export default function MediaLightbox({ media, onClose }: { media: any, onClose:
             src={media.url} 
             controls 
             autoPlay 
-            // 🚀 THE UI TWEAK: Set explicit dimensional viewing bounds
             className="w-auto h-auto max-w-[95%] max-h-[90vh] rounded-xl shadow-2xl" 
           />
         ) : (
           <img 
             src={media.url} 
             alt="Media" 
-            // 🚀 THE UI TWEAK: Forces the image to take up to 95% width or 90% of screen height natively
             className="w-auto h-auto max-w-[95%] max-h-[90vh] object-contain rounded-xl shadow-2xl transition-transform duration-300" 
           />
         )}

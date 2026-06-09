@@ -38,7 +38,6 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
     }
   });
 
-  // Load models from standard stable CDN
   useEffect(() => {
     const loadModels = async () => {
       try {
@@ -58,7 +57,6 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
     loadModels();
   }, []);
 
-  // Upload Handler with full state report mappings
   const handleUpload = async () => {
     if (files.length === 0) return;
     if (!isModelLoaded) {
@@ -68,7 +66,7 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
     setIsUploading(true);
     const faceapi = await import("face-api.js");
 
-    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+    const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
     const validMediaFiles = files.filter(file => {
       const isMedia = file.type.startsWith('image/') || file.type.startsWith('video/');
@@ -87,21 +85,15 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
     let finalModerated: string[] = [];
     let uploadFailed = false;
 
-    // SCAN FACES BEFORE UPLOAD
     const faceVectorsData: Record<string, number[][]> = {};
-    
-    // 🚀 NEW: Add a status message to keep the UI informed
+
     setIsUploading(true); 
 
     for (let i = 0; i < validMediaFiles.length; i++) {
       const file = validMediaFiles[i];
       if (file.type.startsWith('image/')) {
         try {
-          // CRITICAL MEMORY FIX: We MUST attach the image to the DOM.
-          // If the image is massive (e.g. 4K), WebGL crashes. We must scale it down.
-          // If the image is tiny (e.g. 200x200), we must NOT scale it up, or it gets too blurry to scan!
           const img = document.createElement('img');
-          // DO NOT USE crossOrigin="anonymous" on blob URLs, it causes CORS failures in Chrome!
           img.style.position = 'fixed';
           img.style.top = '-9999px';
           img.src = URL.createObjectURL(file);
@@ -112,8 +104,7 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
             img.onload = resolve;
             img.onerror = resolve; 
           });
-          
-          // Only constrain massive images to prevent WebGL crashes. Leave small images alone!
+
           if (img.naturalWidth > 800) {
             img.style.width = '800px'; 
             img.style.height = 'auto';
@@ -123,7 +114,7 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
             .withFaceLandmarks()
             .withFaceDescriptors();
             
-          document.body.removeChild(img); // Clean up immediately!
+          document.body.removeChild(img);
           
           if (detections.length > 0) {
             faceVectorsData[file.name] = detections.map((detection: FaceDescriptorDetection) => Array.from(detection.descriptor));
@@ -136,7 +127,6 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
         }
       }
     }
-    // Now proceed to the fetch() batch loop...
 
     const BATCH_SIZE = 2; 
     
@@ -146,8 +136,7 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
         const formData = new FormData();
         
         batchFiles.forEach((file) => formData.append("media", file));
-        
-        // Use an ordered array for vectors to avoid filename mismatch bugs (e.g. spaces/special chars)
+
         const batchVectors = batchFiles.map(file => faceVectorsData[file.name] || []);
         
         formData.append("eventId", eventId);

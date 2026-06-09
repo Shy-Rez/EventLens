@@ -13,9 +13,8 @@ export default function AccessControlPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newUserName, setNewUserName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
-  const [newUserRole, setNewUserRole] = useState("CLUB_MEMBER"); // 🔥 Default now matches Enum
+  const [newUserRole, setNewUserRole] = useState("CLUB_MEMBER"); 
 
-  // Fetch Users
   const fetchUsers = async () => {
     try {
       const res = await fetch("https://eventlens-backend-cufi.onrender.com/api/users");
@@ -39,7 +38,6 @@ export default function AccessControlPage() {
     fetchUsers();
   }, []);
 
-  // Handle Role Change
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
       const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/users/${userId}/role`, {
@@ -58,7 +56,6 @@ export default function AccessControlPage() {
     }
   };
 
-  // Handle User Deletion
   const handleDeleteUser = async (userId: string) => {
     if (!confirm("Are you sure you want to permanently delete this user?")) return;
 
@@ -77,7 +74,6 @@ export default function AccessControlPage() {
     }
   };
 
-  // Handle Add New User
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -97,7 +93,7 @@ export default function AccessControlPage() {
         setIsAddModalOpen(false);
         setNewUserName("");
         setNewUserEmail("");
-        setNewUserRole("CLUB_MEMBER"); // 🔥 Reset to safe default
+        setNewUserRole("CLUB_MEMBER");
       } else {
          alert("Failed to add user. Check backend console.");
       }
@@ -169,14 +165,14 @@ export default function AccessControlPage() {
                       <td className="p-5">
                         <div className="flex items-center justify-end gap-3">
                           
-                          {/* 👑 Role Badges */}
+                          {/* Role Badges */}
                           {user.role === 'ADMIN' && <span className="bg-purple-500/20 text-purple-400 border border-purple-500/30 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1"><Shield className="w-3 h-3"/> ADMIN</span>}
                           {user.role === 'PHOTOGRAPHER' && <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1"><Camera className="w-3 h-3"/> PHOTOGRAPHER</span>}
-                          {/* 🔥 Updated badge to check for CLUB_MEMBER */}
+                          {/* Updated badge to check for CLUB_MEMBER */}
                           {user.role === 'CLUB_MEMBER' && <span className="bg-blue-500/20 text-blue-400 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1"><Users className="w-3 h-3"/> MEMBER</span>}
                           {user.role === 'VIEWER' && <span className="bg-gray-500/20 text-gray-400 border border-gray-500/30 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">VIEWER</span>}
                           
-                          {/* 🔥 The Dropdown with Safe Enum Values */}
+                          {/* The Dropdown with Safe Enum Values */}
                           <select 
                             value={user.role}
                             onChange={(e) => handleRoleChange(user.id, e.target.value)}
@@ -184,7 +180,7 @@ export default function AccessControlPage() {
                           >
                             <option value="ADMIN">Admin</option>
                             <option value="PHOTOGRAPHER">Photographer</option>
-                            {/* 🔥 Ensure the value perfectly matches the backend Enum */}
+                            {/* Ensure the value perfectly matches the backend Enum */}
                             <option value="CLUB_MEMBER">Member</option>
                             <option value="VIEWER">Viewer</option>
                           </select>
@@ -216,7 +212,6 @@ export default function AccessControlPage() {
         </div>
       </main>
 
-      {/* --- ADD USER MODAL --- */}
       <AnimatePresence>
         {isAddModalOpen && (
           <motion.div 
@@ -262,7 +257,6 @@ export default function AccessControlPage() {
                     className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                   >
                     <option value="VIEWER">Viewer (Public Albums Only)</option>
-                    {/* 🔥 Ensure the value perfectly matches the backend Enum */}
                     <option value="CLUB_MEMBER">Member (Upload Access)</option>
                     <option value="PHOTOGRAPHER">Photographer (Verified Uploader)</option>
                     <option value="ADMIN">Admin (Full Control)</option>

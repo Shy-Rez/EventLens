@@ -22,7 +22,6 @@ export default function CreateEventForm() {
       const data = await response.json();
 
       if (data.success) {
-        // Boom! Redirect straight to the new dynamic event studio
         router.push(`/events/${data.event.id}`);
       } else {
         alert("Failed to create event: " + data.message);

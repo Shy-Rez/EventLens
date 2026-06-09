@@ -21,7 +21,6 @@ export default function Sidebar() {
 
   if (!isMounted) return null;
 
-  // 🚀 THE FIX: Changed "MEMBER" to "CLUB_MEMBER" to perfectly match your PostgreSQL database
   const navLinks = [
     { name: "Dashboard", href: "/", icon: Home, roles: ["ADMIN", "PHOTOGRAPHER", "CLUB_MEMBER", "VIEWER"] },
     { name: "Events and Albums", href: "/albums", icon: ImageIcon, roles: ["ADMIN", "PHOTOGRAPHER", "CLUB_MEMBER", "VIEWER"] },
@@ -52,7 +51,6 @@ export default function Sidebar() {
 
         <nav className="p-4 space-y-1.5 mt-4">
           {navLinks.map((link) => {
-            // Check if the current user's role is allowed to see this link
             if (!link.roles.includes(role || "VIEWER")) return null;
             
             const isActive = pathname === link.href;

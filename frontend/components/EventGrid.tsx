@@ -10,7 +10,7 @@ export default function EventGrid() {
   const [isLoading, setIsLoading] = useState(true);
   
   const router = useRouter();
-  const pathname = usePathname(); // Detects if we are in /uploads or /albums!
+  const pathname = usePathname(); 
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -18,7 +18,6 @@ export default function EventGrid() {
         const res = await fetch("https://eventlens-backend-cufi.onrender.com/api/events");
         const data = await res.json();
         if (data.success) {
-          // Sort events so the newest ones appear first
           const sortedEvents = data.events.sort((a: any, b: any) => 
             new Date(b.date).getTime() - new Date(a.date).getTime()
           );
@@ -56,7 +55,6 @@ export default function EventGrid() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {events.map((event, i) => {
-        // Calculate the total number of media items across all sub-albums
         const totalMedia = event.albums?.reduce((acc: number, album: any) => acc + (album.media?.length || 0), 0) || 0;
 
         return (
@@ -65,7 +63,6 @@ export default function EventGrid() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            // Dynamically route to either /uploads/123 or /albums/123 based on where the user clicked!
             onClick={() => router.push(`${pathname}/${event.id}`)}
             className="group cursor-pointer bg-white/5 border border-white/10 rounded-3xl overflow-hidden hover:bg-white/10 hover:border-white/20 transition-all duration-300 shadow-lg hover:shadow-blue-500/10 flex flex-col"
           >

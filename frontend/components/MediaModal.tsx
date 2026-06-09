@@ -15,7 +15,6 @@ export default function MediaModal({ media, isOpen, onClose }: MediaModalProps) 
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
 
-  // Fetch comments when modal opens
   useEffect(() => {
     if (isOpen && media) {
       fetch(`https://eventlens-backend-cufi.onrender.com/api/media/${media.id}/comments`)
@@ -49,13 +48,9 @@ export default function MediaModal({ media, isOpen, onClose }: MediaModalProps) 
   const handleDownload = () => {
     if (!media) return;
 
-    // ==========================================
-    // 1. VIDEO DOWNLOAD HANDLER
-    // ==========================================
     if (media.type === "VIDEO") {
       const urlParts = media.url.split('/upload/');
       if (urlParts.length === 2) {
-        // Add Cloudinary's fl_attachment flag to force the browser to download the MP4
         const videoDlUrl = `${urlParts[0]}/upload/fl_attachment/${urlParts[1]}`;
         
         const a = document.createElement('a');
@@ -65,12 +60,9 @@ export default function MediaModal({ media, isOpen, onClose }: MediaModalProps) 
         a.click();
         document.body.removeChild(a);
       }
-      return; // Stop here so it doesn't try to run the Image Canvas code
+      return;
     }
 
-    // ==========================================
-    // 2. IMAGE DOWNLOAD HANDLER (With Watermark)
-    // ==========================================
     const img = new Image();
     img.crossOrigin = "anonymous"; 
     img.src = media.url;
@@ -173,7 +165,6 @@ export default function MediaModal({ media, isOpen, onClose }: MediaModalProps) 
               )}
             </div>
 
-            {/* Action Bar (Likes) */}
             <div className="p-4 border-t border-white/10">
               <div className="flex items-center gap-4 mb-4">
                 <button onClick={toggleLike} className="group">
@@ -182,13 +173,11 @@ export default function MediaModal({ media, isOpen, onClose }: MediaModalProps) 
                 <MessageCircle className="w-7 h-7 text-white hover:text-gray-300 cursor-pointer transition-colors" />
               </div>
 
-              {/* NEW: Download Button */}
                 <button onClick={handleDownload} className="flex items-center gap-2 text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors bg-blue-500/10 px-3 py-1.5 rounded-lg">
                   <Download className="w-4 h-4" />
                   Save Image
                 </button>
 
-              {/* Comment Input */}
               <form onSubmit={postComment} className="flex items-center relative">
                 <input
                   type="text"

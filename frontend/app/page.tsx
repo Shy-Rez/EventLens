@@ -10,8 +10,7 @@ import useRole from "@/hooks/useRole";
 export default function DashboardPage() {
   const router = useRouter();
   const { role, user, isMounted, canUpload, isAdmin } = useRole();
-  
-  // 🚀 THE FIX: Added 'likes' to the stats state, and created a state for 'recentActivity'
+
   const [stats, setStats] = useState({ users: 0, events: 0, media: 0, likes: 0 });
   const [recentEvents, setRecentEvents] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
@@ -29,7 +28,6 @@ export default function DashboardPage() {
     if (role) {
       setIsVerifying(false); 
 
-      // 1. Fetch Admin Analytics (Includes Total Likes)
       if (isAdmin) {
         fetch("https://eventlens-backend-cufi.onrender.com/api/analytics")
           .then(res => res.json())
@@ -38,14 +36,12 @@ export default function DashboardPage() {
           });
       }
 
-      // 2. Fetch Recent Event Vaults
       fetch(`https://eventlens-backend-cufi.onrender.com/api/events?role=${role}`)
         .then(res => res.json())
         .then(data => { 
           if (data.success) setRecentEvents(data.events.slice(0, 3)); 
         });
 
-      // 3. 🚀 THE FIX: Fetch the Global Activity Feed (Recently Uploaded Media)
       fetch(`https://eventlens-backend-cufi.onrender.com/api/activity`)
         .then(res => res.json())
         .then(data => {
@@ -71,8 +67,7 @@ export default function DashboardPage() {
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[500px] bg-purple-600/10 rounded-full blur-[150px] pointer-events-none" />
 
         <div className="p-8 lg:p-12 max-w-7xl mx-auto space-y-12 relative z-10">
-          
-          {/* HERO BANNER */}
+
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/5 border border-white/10 rounded-[2rem] p-8 md:p-10 backdrop-blur-xl relative overflow-hidden shadow-2xl">
             <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] pointer-events-none" />
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
@@ -95,7 +90,6 @@ export default function DashboardPage() {
             </div>
           </motion.div>
 
-          {/* 🚀 THE FIX: ADMIN ANALYTICS DASHBOARD (Now includes Likes Counter) */}
           {isAdmin && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <h2 className="text-xl font-bold mb-6 flex items-center gap-3 tracking-wide text-gray-300">
@@ -104,7 +98,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {[
                   { label: "Total Assets", value: stats.media, icon: ImageIcon, color: "text-blue-400", bg: "bg-blue-500/10" },
-                  { label: "Total Interactions", value: stats.likes, icon: Heart, color: "text-pink-400", bg: "bg-pink-500/10" }, // 🚀 LIKES COUNTER
+                  { label: "Total Interactions", value: stats.likes, icon: Heart, color: "text-pink-400", bg: "bg-pink-500/10" },
                   { label: "Active Albums", value: stats.events, icon: FolderPlus, color: "text-purple-400", bg: "bg-purple-500/10" },
                   { label: "Registered Users", value: stats.users, icon: Users, color: "text-green-400", bg: "bg-green-500/10" },
                 ].map((stat, idx) => (
@@ -126,9 +120,7 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            {/* LEFT COLUMN: Events & Actions */}
             <div className="lg:col-span-2 space-y-12">
-              {/* Workspace Actions */}
               {canUpload && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                   <h2 className="text-xl font-bold mb-6 flex items-center gap-2 tracking-wide text-gray-300">
@@ -161,7 +153,6 @@ export default function DashboardPage() {
                 </motion.div>
               )}
 
-              {/* Recent Event Vaults */}
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-3 tracking-wide text-gray-300">
                   <Eye className="w-5 h-5 text-blue-400" /> Recent Albums
@@ -198,7 +189,6 @@ export default function DashboardPage() {
               </motion.div>
             </div>
 
-            {/* 🚀 THE FIX: RIGHT COLUMN (Recently Uploaded Media Feed) */}
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }} className="space-y-6">
               <h2 className="text-xl font-bold flex items-center gap-3 tracking-wide text-gray-300">
                 <Clock className="w-5 h-5 text-purple-400" /> Recent Activity
@@ -211,7 +201,6 @@ export default function DashboardPage() {
                   recentActivity.map((activity, idx) => (
                     <div key={idx} className="flex items-start gap-4 p-3 hover:bg-white/5 rounded-2xl transition-colors group">
                       
-                      {/* 🚀 THE FIX: Dynamic Icons based on Activity Type */}
                       <div className="w-16 h-16 rounded-xl overflow-hidden bg-black flex-shrink-0 relative border border-white/10">
                         {activity.type === 'USER_JOINED' ? (
                           <div className="w-full h-full flex items-center justify-center bg-green-500/10 border border-green-500/20">
@@ -226,7 +215,6 @@ export default function DashboardPage() {
                         )}
                       </div>
                       
-                      {/* Details */}
                       <div className="flex-1 min-w-0 pt-1">
                         <p className="text-sm text-gray-300 leading-tight">
                           <span className="font-bold text-white">{activity.user}</span> {activity.action}{" "}

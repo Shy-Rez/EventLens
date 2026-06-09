@@ -28,18 +28,14 @@ export default function useRole() {
     user, 
     
     isAdmin: role === "ADMIN",
-    // 🚀 THE FIX: We merge Photographer and Club Member so they share identical UI/Access
     isPhotographer: role === "PHOTOGRAPHER" || role === "CLUB_MEMBER", 
     isMember: role === "CLUB_MEMBER",
     isViewer: role === "VIEWER",
-    
-    // Both roles can now upload
+
     canUpload: role === "ADMIN" || role === "PHOTOGRAPHER" || role === "CLUB_MEMBER",
-    
-    // Both roles can now delete media
+
     canDelete: role === "ADMIN" || role === "PHOTOGRAPHER" || role === "CLUB_MEMBER",
-    
-    // Only Admins can manage access
+
     canManageAccess: role === "ADMIN",
   };
 }

@@ -7,7 +7,7 @@ import Sidebar from "../../components/Sidebar";
 import Link from "next/link";
 import useRole from "@/hooks/useRole";
 import EditAlbumModal from "@/components/EditAlbumModal";
-import CreateEventModal from "@/components/CreateEventModal"; // 🚀 IMPORT THE MODAL
+import CreateEventModal from "@/components/CreateEventModal";
 
 export default function AlbumsPage() {
   const [events, setEvents] = useState<any[]>([]);
@@ -17,13 +17,11 @@ export default function AlbumsPage() {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAlbum, setSelectedAlbum] = useState<any | null>(null);
-  
-  // 🚀 STATE FOR CREATION MODAL
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const { role, canUpload } = useRole();
-  
-  // 🚀 THE FIX: A persistent tracker to ignore slow, overlapping "VIEWER" requests
+
   const activeRequest = useRef(0);
 
   const fetchEvents = async () => {
@@ -32,7 +30,6 @@ export default function AlbumsPage() {
       return;
     }
 
-    // Increment the request ID every time a fetch is triggered
     const requestId = ++activeRequest.current;
 
     try {
@@ -41,15 +38,13 @@ export default function AlbumsPage() {
       
       if (!res.ok) throw new Error("Network route unavailable.");
       const data = await res.json();
-      
-      // 🔥 CRITICAL CHECK: Only update the screen if this is the MOST RECENT request
+
       if (data.success && requestId === activeRequest.current) {
         setEvents(data.events);
       }
     } catch (error) {
       console.error("Live platform transaction link interrupted:", error);
     } finally {
-      // Only remove the loading spinner if a newer request hasn't already taken over
       if (requestId === activeRequest.current) {
         setIsLoading(false);
       }
@@ -69,7 +64,6 @@ export default function AlbumsPage() {
     fetchEvents();
   };
 
-  // 🚀 INSTANTLY UPDATE UI ON CREATION
   const handleEventCreated = (newEvent: any) => {
     setEvents((prev) => [newEvent, ...prev]);
   };
@@ -95,8 +89,6 @@ export default function AlbumsPage() {
                 Events and Albums
               </h1>
               <p className="text-gray-400 mt-2 text-sm mb-4">Manage your event details and media collections.</p>
-              
-              {/* 🚀 THE CREATE BUTTON (Only visible if canUpload) */}
               {canUpload && (
                 <button 
                   onClick={() => setIsCreateModalOpen(true)}
@@ -224,7 +216,6 @@ export default function AlbumsPage() {
         onUpdateSuccess={handleAlbumUpdate}
       />
 
-      {/* 🚀 THE CREATION MODAL */}
       <CreateEventModal 
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}

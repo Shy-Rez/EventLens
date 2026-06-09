@@ -14,7 +14,6 @@ export default function StorageConfigPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({ media: 0, users: 0 });
 
-  // Fetch basic system stats to anchor the storage metrics
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -32,15 +31,13 @@ export default function StorageConfigPage() {
     if (role === "ADMIN") fetchStats();
   }, [role]);
 
-  // Hackathon Simulation Metrics (Based on real database counts)
-  const simulatedStorageGB = (stats.media * 0.04).toFixed(2); // Assume ~40MB per original raw image
-  const compressedStorageGB = (stats.media * 0.008).toFixed(2); // Assume ~8MB after WebP Compression
+  const simulatedStorageGB = (stats.media * 0.04).toFixed(2); 
+  const compressedStorageGB = (stats.media * 0.008).toFixed(2);
   const compressionRatio = Math.floor((1 - (Number(compressedStorageGB) / Number(simulatedStorageGB))) * 100) || 80;
   const cdnBandwidth = (stats.media * 0.15).toFixed(1); 
 
   if (!isMounted) return null;
 
-  // Security Gate
   if (role !== "ADMIN") {
     return (
       <div className="flex h-screen w-full bg-[#0a0a0a] text-white overflow-hidden">
@@ -61,7 +58,6 @@ export default function StorageConfigPage() {
       <main className="flex-1 overflow-y-auto p-8 lg:p-12 relative bg-[#0a0a0a]">
         <div className="w-full max-w-7xl mx-auto space-y-8 relative">
           
-          {/* Background Glow */}
           <div className="absolute top-0 right-0 w-[600px] h-[400px] bg-green-600/5 rounded-full blur-[120px] pointer-events-none" />
 
           <header className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
@@ -80,7 +76,6 @@ export default function StorageConfigPage() {
             </div>
           </header>
 
-          {/* Top Metric Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
             {[
               { title: "Raw Asset Volume", value: `${simulatedStorageGB} GB`, icon: HardDrive, color: "text-blue-400", desc: "Uncompressed uploads" },
@@ -104,8 +99,7 @@ export default function StorageConfigPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
-            
-            {/* Storage Distribution Chart (Simulated visually with CSS) */}
+
             <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-3xl p-8 flex flex-col justify-between shadow-lg h-[400px]">
               <div>
                 <h2 className="text-xl font-bold text-white mb-1">Media Distribution</h2>
@@ -145,7 +139,6 @@ export default function StorageConfigPage() {
               </div>
             </div>
 
-            {/* Trash & Recovery Panel */}
             <div className="lg:col-span-1 bg-red-900/10 border border-red-500/20 rounded-3xl p-8 shadow-lg flex flex-col h-[400px]">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 bg-red-500/20 rounded-lg">

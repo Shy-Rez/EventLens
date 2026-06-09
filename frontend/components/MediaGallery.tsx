@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Search, ImageIcon, ImageOff } from "lucide-react";
-import MediaModal from "./MediaModal"; // <-- Modal Import
+import MediaModal from "./MediaModal"; 
 
 interface MediaItem {
   id: string;
@@ -16,11 +16,9 @@ export default function MediaGallery({ eventId }: { eventId: string }) {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  
-  // State to track which image was clicked
+
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
 
-  // Fetch the media when the component loads
   useEffect(() => {
     const fetchMedia = async () => {
       try {
@@ -39,7 +37,6 @@ export default function MediaGallery({ eventId }: { eventId: string }) {
     fetchMedia();
   }, [eventId]);
 
-  // --- AI SEARCH LOGIC ---
   const filteredMedia = media.filter((item) => {
     if (!searchQuery) return true; 
     
@@ -104,8 +101,8 @@ export default function MediaGallery({ eventId }: { eventId: string }) {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
                 key={item.id}
-                onClick={() => setSelectedMedia(item)} // <-- FIX 1: Added onClick to open modal
-                className="cursor-pointer relative group rounded-xl overflow-hidden bg-white/5 border border-white/10 break-inside-avoid" // <-- FIX 2: Added cursor-pointer
+                onClick={() => setSelectedMedia(item)} 
+                className="cursor-pointer relative group rounded-xl overflow-hidden bg-white/5 border border-white/10 break-inside-avoid" 
               >
                 {item.type === "VIDEO" ? (
                   <video src={item.url} controls className="w-full h-auto object-cover" />

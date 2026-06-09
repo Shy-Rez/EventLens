@@ -7,12 +7,12 @@ import { X, Calendar, Type, Tag, Shield, Loader2, AlignLeft } from "lucide-react
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (newEvent: any) => void; // 🚀 THE FIX: Added onSuccess to update the grid instantly
+  onSuccess: (newEvent: any) => void; 
 }
 
 export default function CreateEventModal({ isOpen, onClose, onSuccess }: CreateEventModalProps) {
   const [formData, setFormData] = useState({
-    title: "", // 🚀 THE FIX: Changed 'name' to 'title' so the backend accepts it!
+    title: "", 
     description: "",
     date: "",
     category: "Photoshoot",
@@ -35,9 +35,8 @@ export default function CreateEventModal({ isOpen, onClose, onSuccess }: CreateE
       const data = await response.json();
 
       if (data.success) {
-        onSuccess(data.event); // Push the new event to the UI instantly
-        
-        // Reset form for next time
+        onSuccess(data.event);
+
         setFormData({ title: "", description: "", date: "", category: "Photoshoot", isPublic: true });
         onClose();
       } else {
@@ -55,8 +54,7 @@ export default function CreateEventModal({ isOpen, onClose, onSuccess }: CreateE
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-          
-          {/* Backdrop */}
+
           <motion.div
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
@@ -65,14 +63,13 @@ export default function CreateEventModal({ isOpen, onClose, onSuccess }: CreateE
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
           />
 
-          {/* Modal Content */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }} 
             animate={{ opacity: 1, scale: 1, y: 0 }} 
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="relative w-full max-w-2xl bg-[#0a0a0a] rounded-[2rem] shadow-2xl overflow-hidden border border-white/10"
           >
-            {/* Premium Background Glow */}
+
             <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] pointer-events-none" />
 
             <div className="px-8 py-6 border-b border-white/10 flex justify-between items-center bg-white/5 relative z-10">
@@ -83,8 +80,7 @@ export default function CreateEventModal({ isOpen, onClose, onSuccess }: CreateE
             </div>
 
             <form onSubmit={handleSubmit} className="p-8 space-y-6 relative z-10">
-              
-              {/* Event Name & Date Row */}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block">
@@ -120,7 +116,6 @@ export default function CreateEventModal({ isOpen, onClose, onSuccess }: CreateE
                 </div>
               </div>
 
-              {/* Description */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block">
                   Description
@@ -137,7 +132,6 @@ export default function CreateEventModal({ isOpen, onClose, onSuccess }: CreateE
                 </div>
               </div>
 
-              {/* Category & Privacy Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block">
@@ -176,7 +170,6 @@ export default function CreateEventModal({ isOpen, onClose, onSuccess }: CreateE
                 </div>
               </div>
 
-              {/* Submit Button */}
               <div className="pt-4 border-t border-white/10 mt-6">
                 <button 
                   type="submit" 

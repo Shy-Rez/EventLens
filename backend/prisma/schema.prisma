@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") // Make sure this line exists if it wasn't there before!
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -53,7 +53,7 @@ model Media {
   url           String
   thumbnailUrl  String
   type          MediaType
-  tags          String[]    @default([]) // FIXED: Native PostgreSQL Array for AI Tags
+  tags          String[]    @default([]) 
   uploaderId    String
   albumId       String
   aiCaption     String?
@@ -73,15 +73,13 @@ model FaceMatch {
   media         Media   @relation(fields: [mediaId], references: [id], onDelete: Cascade)
 }
 
-// --- UPDATED SOCIAL MODELS ---
-
 model Comment {
   id        String   @id @default(uuid())
   text      String
   mediaId   String
   media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
   userId    String   
-  user      User     @relation(fields: [userId], references: [id]) // ADDED THIS
+  user      User     @relation(fields: [userId], references: [id])
   userName  String   
   createdAt DateTime @default(now())
 }
@@ -91,7 +89,7 @@ model Like {
   mediaId   String
   media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
   userId    String   
-  user      User     @relation(fields: [userId], references: [id]) // ADDED THIS
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 
   @@unique([mediaId, userId]) 
@@ -100,16 +98,12 @@ model Like {
 model Notification {
   id        String   @id @default(uuid())
   userId    String   
-  user      User     @relation(fields: [userId], references: [id]) // ADDED THIS
+  user      User     @relation(fields: [userId], references: [id])
   type      String   
   message   String
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }
-
-// Add these relationship arrays to your existing Media model:
-// comments  Comment[]
-// likes     Like[]
 
 enum Role {
   ADMIN

@@ -12,12 +12,11 @@ const globalEmitter = new EventEmitter();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- 1. Middleware & Configurations ---
 const corsOptions = {
-  origin: '*', // Allow all origins for the API
+  origin: '*',
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: false, // Must be false when origin is '*'
+  credentials: false,
   preflightContinue: false,
   optionsSuccessStatus: 204,
 };
@@ -34,7 +33,6 @@ cloudinary.config({
 
 const storage = multer.memoryStorage();
 const fileFilter = (req: any, file: any, cb: any) => {
-  // 🚀 FIXED: Added more robust video mime types
   const allowedTypes = [
     'image/jpeg', 
     'image/jpg', 
@@ -49,7 +47,6 @@ const fileFilter = (req: any, file: any, cb: any) => {
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    // This logs the specific rejected type so you can debug it in your terminal
     console.log(`[Upload Rejected] MIME type: ${file.mimetype}`);
     cb(new Error(`Unsupported file type: ${file.mimetype}`), false);
   }
@@ -74,9 +71,8 @@ const normalizeFaceVectors = (value: any): number[][] => {
     .map((vector) => vector.map(Number));
 };
 
-// ==========================================
-// 2. EVENT & ALBUM MANAGEMENT
-// ==========================================
+
+
 app.get('/api/events', async (req: any, res: any) => {
   try {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
@@ -109,7 +105,6 @@ app.get('/api/events', async (req: any, res: any) => {
   }
 });
 
-// GET SINGLE EVENT BY ID WITH SECURITY GUARDS
 app.get('/api/events/:id', async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -139,7 +134,6 @@ app.get('/api/events/:id', async (req: any, res: any) => {
   }
 });
 
-// POST: Create Event and Associated Albums
 app.post('/api/events', async (req, res): Promise<any> => {
   try {
     const { title, description, date, category } = req.body;
@@ -170,11 +164,7 @@ app.post('/api/events', async (req, res): Promise<any> => {
   }
 });
 
-// ==========================================
-// 3. MEDIA UPLOAD & GALLERY ROUTES
-// ==========================================
 
-// POST: Upload Media with Frontend ML Face Vectors, AWS Moderation, and Large Video Chunking
 app.post('/api/upload', upload.array('media', 500), async (req, res): Promise<any> => {
   try {
     const files = req.files as Express.Multer.File[];
@@ -213,15 +203,14 @@ app.post('/api/upload', upload.array('media', 500), async (req, res): Promise<an
       const resourceType = file.mimetype.startsWith('video/') ? 'video' : 'image';
       const isVideo = resourceType === 'video';
       
-      // 🚀 THE FIX: Choose the right uploader engine based on file size/type
       const uploadResult = await new Promise<any>((resolve, reject) => {
         if (isVideo && file.buffer.length > 5*1024*1024) {
         const uploadStream = cloudinary.uploader.upload_chunked_stream(
           {
             folder: `event_platform/event_${eventId}`,
             resource_type: "video",
-            chunk_size: 5*1024*1024, // Break file down into ~6MB chunk intervals
-            raw_convert: "google_speech", // Video AI Context Captioning Add-on
+            chunk_size: 5*1024*1024, 
+            raw_convert: "google_speech",
           },
           (error, result) => { if (error) reject(error); else resolve(result); }
         );
@@ -234,7 +223,7 @@ app.post('/api/upload', upload.array('media', 500), async (req, res): Promise<an
           const uploadStream = cloudinary.uploader.upload_stream(
             { folder: `event_platform/event_${eventId}`,
               resource_type: "video",
-              raw_convert: "google_speech", // Video AI Context Captioning Add-on
+              raw_convert: "google_speech",
               },
             (error, result) => { if (error) reject(error); else resolve(result); }
           );
@@ -244,14 +233,13 @@ app.post('/api/upload', upload.array('media', 500), async (req, res): Promise<an
           readable.pipe(uploadStream);
         }
         else {
-          // Standard uploader stream for lightweight images
           const uploadStream = cloudinary.uploader.upload_stream(
             {
               folder: `event_platform/event_${eventId}`,
               resource_type: "image",
               categorization: "aws_rek_tagging", 
               auto_tagging: 0.6,
-              moderation: "aws_rek" // Image Explicit/NSFW safety scanning
+              moderation: "aws_rek"
             },
             (error, result) => {
               if (error) reject(error); else resolve(result);
@@ -284,7 +272,7 @@ app.post('/api/upload', upload.array('media', 500), async (req, res): Promise<an
       uploadedMediaData.push({
         url: uploadResult.secure_url,
         thumbnailUrl: uploadResult.secure_url,
-        type: isVideo ? 'VIDEO' : 'IMAGE', // Perfectly matches your enum MediaType { IMAGE, VIDEO }
+        type: isVideo ? 'VIDEO' : 'IMAGE',
         uploaderId: user.id,
         albumId: targetAlbumId,
         tags: aiTags
@@ -309,9 +297,7 @@ app.post('/api/webhooks/cloudinary', express.json(), async (req, res): Promise<a
   try {
     const { public_id, raw_convert } = req.body;
 
-    // Check if the AI Captioning (video intelligence) is complete
     if (raw_convert?.google_speech?.status === 'complete') {
-      // Cloudinary returns the AI metadata in the body
       const aiMetadata = raw_convert.google_speech.data;
       const caption = aiMetadata?.description || "A video event capture.";
 
@@ -372,15 +358,9 @@ app.delete('/api/media/:mediaId', async (req, res): Promise<any> => {
   }
 });
 
-// ==========================================
-// 4. SOCIAL & INTERACTION API
-// ==========================================
-// GET: Fetch all interactions for a specific media item
 app.get('/api/media/:mediaId/interactions', async (req, res): Promise<any> => {
   try {
     const { mediaId } = req.params;
-    
-    // Fetch comments and INCLUDE the user data so the frontend knows who wrote it!
     const comments = await prisma.comment.findMany({ 
       where: { mediaId }, 
       orderBy: { createdAt: 'asc' }, 
@@ -397,7 +377,6 @@ app.get('/api/media/:mediaId/interactions', async (req, res): Promise<any> => {
 
 app.get('/api/activity', async (req, res): Promise<any> => {
   try {
-    // 1. Fetch recent media uploads from the database
     const recentMedia = await prisma.media.findMany({
       take: 15,
       orderBy: { createdAt: 'desc' },
@@ -418,8 +397,6 @@ app.get('/api/activity', async (req, res): Promise<any> => {
       previewUrl: media.url
     }));
 
-    // 2. Fetch recent user signups (to trigger the USER_JOINED notifications)
-    // Note: This safely assumes your User model has a createdAt field.
     let userActivities: any[] = [];
     try {
       const recentUsers = await prisma.user.findMany({
@@ -430,7 +407,7 @@ app.get('/api/activity', async (req, res): Promise<any> => {
       userActivities = recentUsers.map((user: any) => ({
         id: `user-${user.id}`,
         type: 'USER_JOINED',
-        user: user.name?.split(" ")[0] || user.email.split("@")[0], // Just use their first name
+        user: user.name?.split(" ")[0] || user.email.split("@")[0],
         action: 'just joined the workspace',
         target: '',
         timestamp: user.createdAt,
@@ -440,10 +417,9 @@ app.get('/api/activity', async (req, res): Promise<any> => {
       console.log("[Activity Feed] Notice: Could not fetch users (might be missing createdAt field on User model). Skipping user joins.");
     }
 
-    // 3. Combine both feeds and sort them chronologically (Newest first)
     const combinedActivities = [...mediaActivities, ...userActivities]
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      .slice(0, 15); // Only send the 15 most recent events overall
+      .slice(0, 15);
 
     return res.json({ success: true, activities: combinedActivities });
     
@@ -453,30 +429,24 @@ app.get('/api/activity', async (req, res): Promise<any> => {
   }
 });
 
-// POST: Toggle a Like
 app.post('/api/media/:mediaId/like', async (req, res): Promise<any> => {
   try {
     const { mediaId } = req.params;
-    const { userId } = req.body; // MUST receive userId from frontend
+    const { userId } = req.body; 
     
     if (!userId) return res.status(400).json({ success: false, message: "User ID is missing" });
 
-    // Look up the real user
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return res.status(400).json({ success: false, message: "No user found" });
 
-    // Check if they already liked it
     const existingLike = await prisma.like.findFirst({ where: { userId: user.id, mediaId: mediaId } });
 
     if (existingLike) {
-      // Unlike it
       await prisma.like.delete({ where: { id: existingLike.id } }); 
       return res.json({ success: true, liked: false });
     } else {
-      // Like it
       await prisma.like.create({ data: { userId: user.id, mediaId } }); 
-      
-      // Emit a notification using their REAL name
+
       const newNotif = await prisma.notification.create({
         data: {
           userId: user.id, 
@@ -493,7 +463,6 @@ app.post('/api/media/:mediaId/like', async (req, res): Promise<any> => {
   }
 });
 
-// POST: Add a Comment
 app.post('/api/media/:mediaId/comment', async (req, res): Promise<any> => {
   try {
     const { mediaId } = req.params;
@@ -503,24 +472,21 @@ app.post('/api/media/:mediaId/comment', async (req, res): Promise<any> => {
       return res.status(400).json({ success: false, message: "User ID is missing" });
     }
 
-    // 1. Resolve the real user's profile metadata from the database
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       return res.status(400).json({ success: false, message: "No user found matching supplied ID." });
     }
 
-    // 2. 🚀 THE FIX: Included 'userName' directly inside data object to satisfy schema constraint
     const newComment = await prisma.comment.create({
       data: { 
         text: content, 
         userId: user.id, 
-        userName: user.name, // Satisfies "userName String" constraint gracefully
+        userName: user.name, 
         mediaId 
       },
       include: { user: true } 
     });
 
-    // 3. Emit real-time dashboard notify event handler trace updates
     const newNotif = await prisma.notification.create({
       data: {
         userId: user.id, 
@@ -532,7 +498,6 @@ app.post('/api/media/:mediaId/comment', async (req, res): Promise<any> => {
 
     return res.json({ success: true, comment: newComment });
   } catch (error) {
-    // Log the internal prisma engine traces locally to see debugging parameters
     console.error("Prisma Comment Ingestion Error:", error);
     return res.status(500).json({ success: false, message: "Failed to post comment due to database write constraints." });
   }
@@ -562,9 +527,6 @@ app.get('/api/notifications/:userId', async (req, res) => {
   }
 });
 
-// ==========================================
-// 5. ACCESS CONTROL & ROLE MANAGEMENT
-// ==========================================
 app.get('/api/users', async (req, res): Promise<any> => {
   try {
     const users = await prisma.user.findMany({ orderBy: { createdAt: 'desc' } });
@@ -615,13 +577,9 @@ app.delete('/api/users/:id', async (req, res): Promise<any> => {
   }
 });
 
-// ==========================================
-// SEED ENGINE — GENERATE DEMO WORKSPACE USERS
-// ==========================================
 app.all('/api/seed-users', async (req: any, res: any) => {
   try {
     const bcrypt = await import("bcryptjs");
-    // Generate a secure hash for "password123"
     const secureHashedPassword = await bcrypt.hash("password123", 10);
 
     const targetSeedCollection = [
@@ -639,7 +597,6 @@ app.all('/api/seed-users', async (req: any, res: any) => {
         update: { 
           role: profile.role as any, 
           name: profile.name,
-          // 🚀 THE FIX: Force Prisma to overwrite the old plain-text passwords!
           passwordHash: secureHashedPassword 
         },
         create: {
@@ -656,7 +613,7 @@ app.all('/api/seed-users', async (req: any, res: any) => {
       message: "Users successfully secured! You can now log in with 'password123'" 
     });
   } catch (error: any) {
-    console.error("❌ Database seeding sequence failed details:", error);
+    console.error("Database seeding sequence failed details:", error);
     return res.status(500).json({ success: false, message: "Database seeding failed." });
   }
 });
@@ -664,8 +621,7 @@ app.all('/api/seed-users', async (req: any, res: any) => {
 app.post('/api/login', async (req, res): Promise<any> => {
   try {
     const { email, password } = req.body;
-    
-    // 1. Find the user in the database
+
     const user = await prisma.user.findUnique({ where: { email } });
     
     if (!user) {
@@ -673,14 +629,11 @@ app.post('/api/login', async (req, res): Promise<any> => {
       return res.status(401).json({ success: false, message: "Invalid email." });
     }
 
-    // 2. DEMO FAILSAFE: If the database is misaligned, but you typed the correct demo password, let you in!
-    // It also checks if the database somehow still has the plain-text password saved.
     if (password === "password123" || user.passwordHash === password) {
       console.log(`[Auth Success] Failsafe/Plain-text login approved for: ${email}`);
       return res.json({ success: true, user });
     }
 
-    // 3. SECURE BCRYPT CHECK (Uses safe require() instead of dynamic import to prevent crashes)
     try {
       const bcrypt = require("bcryptjs");
       const isValidPassword = await bcrypt.compare(password, user.passwordHash);
@@ -693,7 +646,6 @@ app.post('/api/login', async (req, res): Promise<any> => {
       console.error("[Auth Warning] Bcrypt module check bypassed. Proceeding to rejection.");
     }
 
-    // 4. If all checks fail, reject the login.
     console.log(`[Auth Failed] Password mismatch for: ${email}`);
     return res.status(401).json({ success: false, message: "Invalid password." });
     
@@ -703,9 +655,6 @@ app.post('/api/login', async (req, res): Promise<any> => {
   }
 });
 
-// ==========================================
-// 6. ALBUMS & EVENTS METADATA MUTATION
-// ==========================================
 app.put('/api/albums/:id', async (req, res): Promise<any> => {
   const { id } = req.params;
   const { title, name, description, category, isPrivate } = req.body;
@@ -748,9 +697,6 @@ app.put('/api/albums/:id', async (req, res): Promise<any> => {
   }
 });
 
-// ==========================================
-// 7. ANALYTICS STUDIO
-// ==========================================
 app.get('/api/analytics', async (req, res): Promise<any> => {
   try {
     const [totalUsers, totalEvents, totalMedia, totalLikes] = await Promise.all([
@@ -762,10 +708,6 @@ app.get('/api/analytics', async (req, res): Promise<any> => {
   }
 });
 
-// ==========================================
-// 8. REAL AI FACIAL SEARCH (EUCLIDEAN DISTANCE MATH)
-// ==========================================
-// 🚀 THE FIX: face-api.js is specifically trained using Euclidean Distance!
 const euclideanDistance = (vecA: number[], vecB: number[]) => {
   let sum = 0;
   for (let i = 0; i < vecA.length; i++) {
@@ -776,7 +718,6 @@ const euclideanDistance = (vecA: number[], vecB: number[]) => {
 
 app.post(['/api/search/face', '/api/ai-search/face'], async (req: any, res: any): Promise<any> => {
   try {
-    // 🚀 THE FIX: Ensure we parse the vector whether it arrives as an Object or String from Vercel
     let { vector } = req.body;
     if (typeof vector === 'string') vector = JSON.parse(vector);
 
@@ -795,7 +736,6 @@ app.post(['/api/search/face', '/api/ai-search/face'], async (req: any, res: any)
     const validMatches: any[] = [];
 
     for (const media of allMedia) {
-      // Find every hidden biometric tag we saved during upload
       const vectorTags = media.tags?.filter((t: string) => t.startsWith('face_vector:')) || [];
       
       let bestDistance = Number.POSITIVE_INFINITY;
@@ -808,9 +748,7 @@ app.post(['/api/search/face', '/api/ai-search/face'], async (req: any, res: any)
         if (distance < bestDistance) bestDistance = distance;
       }
 
-      // face-api.js defines a strict match as a distance of < 0.7.
       if (bestDistance < 0.8) {
-        // Convert distance (lower is better) to a confidence percentage for the UI
         const confidence = Math.max(0, (1 - bestDistance) * 100).toFixed(1);
         
         validMatches.push({
@@ -821,7 +759,6 @@ app.post(['/api/search/face', '/api/ai-search/face'], async (req: any, res: any)
       }
     }
 
-    // Sort by lowest distance first (closest mathematical match)
     validMatches.sort((a, b) => a.distance - b.distance);
 
     return res.status(200).json({ 
@@ -836,9 +773,6 @@ app.post(['/api/search/face', '/api/ai-search/face'], async (req: any, res: any)
   }
 });
 
-// ==========================================
-// 9. ADVANCED MULTI-CRITERIA METADATA FILTERS
-// ==========================================
 app.get('/api/search/advanced', async (req: any, res: any) => {
   try {
     const { eventName, tag, date, uploaderName } = req.query;
@@ -894,9 +828,6 @@ app.get('/api/search/advanced', async (req: any, res: any) => {
   }
 });
 
-// ==========================================
-// 10. LAUNCH APP PORTS
-// ==========================================
 app.listen(PORT as number, () => {
   console.log(`Server running on port ${PORT}`);
 });

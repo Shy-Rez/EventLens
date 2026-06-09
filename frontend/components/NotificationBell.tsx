@@ -8,17 +8,14 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // Hardcoded for demo purposes to match our backend emitter
   const userId = "demo-user-id"; 
 
   useEffect(() => {
-    // Connect to our Backend Server-Sent Events stream
     const eventSource = new EventSource(`https://eventlens-backend-cufi.onrender.com/api/notifications/stream/${userId}`);
 
     eventSource.onmessage = (event) => {
       try {
         const newNotification = JSON.parse(event.data);
-        // Only add to dropdown list (No toasts here!)
         setNotifications((prev) => [newNotification, ...prev]);
       } catch (err) {
         console.error("Error parsing bell notification:", err);

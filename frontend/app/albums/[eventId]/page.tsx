@@ -24,13 +24,10 @@ export default function EventDetailPage() {
   const [displayedMediaCount, setDisplayedMediaCount] = useState(12);
   const observer = useRef<IntersectionObserver | null>(null);
 
-  // Grab the reactive permissions state context from your standardized auth hook
   const { role, canUpload } = useRole();
 
-  // 🚀 THE FINAL ROOT FIX: Force the page to hold its fetch until useRole() finishes parsing disk storage
   useEffect(() => {
     const fetchEventDetails = async () => {
-      // 🛑 GUARD: If role is still loading or null, FREEZE execution here!
       if (!role) {
         console.log("[Single Event Viewer] Role context uninitialized. Holding network handshake thread...");
         return;
@@ -39,8 +36,7 @@ export default function EventDetailPage() {
       try {
         setIsLoading(true);
         console.log(`[Single Event Viewer] Authenticated fetch request using role parameter: ${role.toUpperCase()}`);
-        
-        // Explicitly pass your verified administrative role parameter in UPPERCASE
+
         const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/events/${eventId}?role=${role.toUpperCase()}`);
         const data = await res.json();
         
@@ -60,10 +56,8 @@ export default function EventDetailPage() {
     if (eventId) fetchEventDetails();
   }, [eventId, role]);
 
-  // 3. SAFE DERIVED DATA
   const activeAlbum = event?.albums?.find((a: any) => a.id === activeAlbumId);
 
-  // 4. CALLBACK HOOK (Infinite Scroll)
   const lastMediaElementRef = useCallback((node: any) => {
     if (isLoading) return;
     if (observer.current) observer.current.disconnect();
@@ -77,7 +71,6 @@ export default function EventDetailPage() {
     if (node) observer.current.observe(node);
   }, [isLoading, activeAlbum, displayedMediaCount]);
 
-  // Handle Media Deletion
   const handleDeleteMedia = async (mediaId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!confirm("Are you sure you want to permanently delete this file?")) return;
@@ -104,7 +97,6 @@ export default function EventDetailPage() {
     }
   };
 
-  // Handle Dynamic Watermarked Downloads
   const handleWatermarkedDownload = async (item: any, e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
@@ -139,7 +131,6 @@ export default function EventDetailPage() {
     }
   };
 
-  // 5. EARLY RETURNS (Wrapped in Layout Shell to prevent Sidebar flicker)
   if (isLoading) {
     return (
       <div className="flex h-screen w-full bg-[#0a0a0a] text-white overflow-hidden">
@@ -166,7 +157,6 @@ export default function EventDetailPage() {
     );
   }
 
-  // 6. MAIN RENDER WITH PREMIUM INLINE CANVAS UI
   return (
     <div className="flex h-screen w-full bg-[#0a0a0a] text-white overflow-hidden">
       

@@ -14,9 +14,6 @@ export default function OfflineManager() {
     
     setIsOffline(!navigator.onLine);
 
-    // 🚀 THE BULLETPROOF FIX:
-    // Only register the service worker if we are running a production build.
-    // This safely stops it from breaking your web page when running 'npm run dev'!
     if (
       typeof window !== "undefined" && 
       "serviceWorker" in navigator && 

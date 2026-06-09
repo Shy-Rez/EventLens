@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, Image as ImageIcon, Video, User, Star, Loader2 } from "lucide-react";
 
-// Matches the data structure we built in the Express backend
 interface Activity {
   id: string | number;
   type: string;
@@ -22,7 +21,6 @@ export default function ActivityTimelineTab() {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        // Fetching from your local backend
         const res = await fetch("https://eventlens-backend-cufi.onrender.com/api/activity");
         const data = await res.json();
         
@@ -37,13 +35,9 @@ export default function ActivityTimelineTab() {
     };
 
     fetchActivities();
-    
-    // Optional: Set up a polling interval to auto-refresh every 10 seconds
-    // const interval = setInterval(fetchActivities, 10000);
-    // return () => clearInterval(interval);
+
   }, []);
 
-  // Helper to format timestamps nicely
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
     return date.toLocaleDateString('en-US', { 
@@ -51,7 +45,6 @@ export default function ActivityTimelineTab() {
     });
   };
 
-  // Helper to pick the right icon based on activity type
   const getIcon = (type: string) => {
     if (type === 'VIDEO_UPLOAD') return <Video className="w-5 h-5 text-purple-400" />;
     if (type === 'PHOTO_UPLOAD') return <ImageIcon className="w-5 h-5 text-blue-400" />;
@@ -91,7 +84,6 @@ export default function ActivityTimelineTab() {
                 transition={{ delay: idx * 0.1 }}
                 className="relative pl-8"
               >
-                {/* The Timeline Node (Icon) */}
                 <div className="absolute -left-[20px] top-1 bg-[#121212] p-2 rounded-full border border-white/10 shadow-lg">
                   {getIcon(activity.type)}
                 </div>
@@ -108,7 +100,6 @@ export default function ActivityTimelineTab() {
                     </span>
                   </div>
 
-                  {/* If the activity has a preview image (like an upload), show a thumbnail! */}
                   {activity.previewUrl && (
                     <div className="mt-4 rounded-xl overflow-hidden h-32 w-48 relative border border-white/10">
                       <img 

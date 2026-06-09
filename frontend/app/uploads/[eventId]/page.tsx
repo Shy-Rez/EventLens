@@ -7,7 +7,7 @@ import { ArrowLeft, Loader2, UploadCloud, Image as ImageIcon, Video, Trash2, Dow
 import useRole from "@/hooks/useRole"; 
 import MediaUploadZone from "../../../components/MediaUploadZone";
 import MediaLightbox from "../../../components/MediaLightbox";
-import Sidebar from "@/components/Sidebar"; // 🚀 IMPORTED THE SIDEBAR
+import Sidebar from "@/components/Sidebar"; 
 
 export default function EventUploadStudioPage() {
   const params = useParams();
@@ -19,12 +19,10 @@ export default function EventUploadStudioPage() {
   const [recentMedia, setRecentMedia] = useState<any[]>([]);
   const [selectedMedia, setSelectedMedia] = useState<any>(null);
 
-  // Connect standardized role parameters mapping framework
   const { role, isMounted, canUpload } = useRole();
 
   useEffect(() => {
     const fetchEventData = async () => {
-      // 🚀 THE ACCESS CONTROL FIX: Hold fire until permissions populate fully
       if (!role) {
         console.log("[Upload Studio Page] Resolving client validation clearance tiers...");
         return;
@@ -32,7 +30,6 @@ export default function EventUploadStudioPage() {
 
       try {
         setIsLoading(true);
-        // Forward uppercase credentials parameter straight into backend filtration queries
         const res = await fetch(`https://eventlens-backend-cufi.onrender.com/api/events/${eventId}?role=${role.toUpperCase()}`);
         const data = await res.json();
         
@@ -52,7 +49,7 @@ export default function EventUploadStudioPage() {
     };
 
     if (eventId && role) fetchEventData();
-  }, [eventId, role]); // Sits cleanly synced to active context updates
+  }, [eventId, role]);
 
   // Handle Media Deletion
   const handleDeleteMedia = async (mediaId: string, e: React.MouseEvent) => {
@@ -73,7 +70,6 @@ export default function EventUploadStudioPage() {
     }
   };
 
-  // Handle Dynamic Watermarked Downloads
   const handleWatermarkedDownload = async (item: any, e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
@@ -107,10 +103,8 @@ export default function EventUploadStudioPage() {
     }
   };
 
-  // Hydration fallback validation
   if (!isMounted) return null;
 
-  // 🚀 FIXED: Wrapped the loading state in the Global Layout Shell
   if (isLoading) {
     return (
       <div className="flex h-screen w-full bg-[#0a0a0a] text-white overflow-hidden">
@@ -122,22 +116,14 @@ export default function EventUploadStudioPage() {
     );
   }
 
-  // 🚀 FIXED: Wrapped the main render in the Global Layout Shell
   return (
     <div className="flex h-screen w-full bg-[#0a0a0a] text-white overflow-hidden">
-      
-      {/* Pinned Left Sidebar */}
-      <Sidebar />
 
-      {/* Main Padded Content Area */}
+      <Sidebar />
       <main className="flex-1 overflow-y-auto p-8 lg:p-12 relative bg-[#0a0a0a]">
-        
         <div className="w-full max-w-5xl mx-auto relative">
           <div className="absolute top-0 right-0 w-[600px] h-[300px] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none" />
-
           <div className="relative z-10 space-y-8">
-            
-            {/* Back Link Control */}
             <button 
               onClick={() => router.push('/uploads')}
               className="flex items-center text-sm font-semibold tracking-wide text-gray-400 hover:text-white transition-colors group"
@@ -145,8 +131,6 @@ export default function EventUploadStudioPage() {
               <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
               Back to Upload Studio
             </button>
-
-            {/* HERO BANNER INFORMATION LAYER */}
             <div className="bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-md">
               <div className="flex items-center gap-4 mb-2">
                 <div className="p-3 bg-blue-500/20 text-blue-400 rounded-xl">
@@ -160,13 +144,9 @@ export default function EventUploadStudioPage() {
                 </div>
               </div>
             </div>
-
-            {/* DROPZONE INTEGRATION SECTOR */}
             <div className="mb-16">
               <MediaUploadZone eventId={eventId} />
             </div>
-
-            {/* RECENT UPLOADS MATRIX LAYER FEED */}
             <div>
               <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2 uppercase tracking-wider text-gray-400">
                 <ImageIcon className="w-5 h-5 text-gray-400" /> 
@@ -195,8 +175,7 @@ export default function EventUploadStudioPage() {
                       ) : (
                         <img src={item.url} alt="Uploaded" className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-500" />
                       )}
-                      
-                      {/* Action Overlay */}
+
                       <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-4">
                         <div className="flex justify-between items-start gap-2">
                           <div className="flex flex-wrap gap-1.5 overflow-hidden max-h-16">

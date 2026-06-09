@@ -77,12 +77,9 @@ export default function AIFaceFinderPage() {
 
   const { isMounted, role } = useRole();
 
-  // 🚀 LOAD NEURAL NETWORKS ON MOUNT
-  // 🚀 LOAD NEURAL NETWORKS ON MOUNT (USING CLOUD CDN)
   useEffect(() => {
     const loadModels = async () => {
       try {
-        // 🚀 THE FIX: Tell face-api to pull the models straight from the jsDelivr Cloud CDN
         const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights'; 
         
         await Promise.all([
@@ -110,7 +107,6 @@ export default function AIFaceFinderPage() {
     }
   };
 
-  // 🚀 UPDATED: EXTRACT VECTOR AND SEND TO BACKEND API
   const scanUnindexedLibraryMedia = async (referenceVector: number[], existingMatches: MediaItem[]) => {
     try {
       const eventsResponse = await fetch(`${API_BASE_URL}/events?role=${role.toUpperCase()}`);
@@ -185,7 +181,6 @@ export default function AIFaceFinderPage() {
     setStatusMessage("Extracting 128D facial embeddings from your selfie...");
 
     try {
-      // 1. Analyze the uploaded selfie in the browser
       const refImgElement = document.getElementById('reference-image') as HTMLImageElement;
       const refDetection = await faceapi.detectSingleFace(refImgElement).withFaceLandmarks().withFaceDescriptor();
 
@@ -195,11 +190,9 @@ export default function AIFaceFinderPage() {
         return;
       }
 
-      // Convert the Float32Array to a standard JavaScript Array for the JSON payload
       const vectorArray = Array.from(refDetection.descriptor);
       setStatusMessage("Selfie embedded successfully. Querying database matrix...");
 
-      // 2. Send the 128D vector to your new Backend Route
       const response = await fetch(`${API_BASE_URL}/search/face`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

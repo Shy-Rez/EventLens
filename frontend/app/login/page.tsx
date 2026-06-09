@@ -20,7 +20,6 @@ export default function LoginPage() {
     const loginEmail = directEmail || email;
     const loginPassword = directEmail ? "password123" : password;
 
-    // 🔍 DEBUG LOG 1: Check what we are sending
     console.log(`[Login Attempt] Sending -> Email: ${loginEmail}, Password: ${loginPassword}`);
 
     try {
@@ -31,14 +30,12 @@ export default function LoginPage() {
       });
 
       const data = await res.json();
-      
-      // 🔍 DEBUG LOG 2: Check EXACTLY what the backend replies with
+
       console.log("[Backend Response] ->", data);
 
       if (data.success) {
         localStorage.setItem("user", JSON.stringify(data.user));
-        
-        // 🚀 THE FIX: Force a hard browser reload to wipe the Next.js cache!
+
         window.location.href = "/"; 
         
       }else {
@@ -46,7 +43,6 @@ export default function LoginPage() {
         setIsLoading(false);
       }
     } catch (err) {
-      // 🔍 DEBUG LOG 3: Check if the server is crashed or blocking CORS
       console.error("[Network Error] ->", err);
       setError("Failed to connect to the authentication server.");
       setIsLoading(false);
@@ -61,16 +57,15 @@ export default function LoginPage() {
 
       <div className="w-full max-w-5xl flex flex-col md:flex-row items-center gap-12 z-10 px-6">
         
-        {/* Left Side: Branding & Pitch */}
         <div className="flex-1 text-center md:text-left">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-500 to-purple-600 mb-6 flex items-center justify-center mx-auto md:mx-0 shadow-lg shadow-blue-500/30">
             <span className="text-white font-extrabold text-3xl">C</span>
           </div>
           <h1 className="text-5xl font-extrabold text-white tracking-tight mb-4">
-            CIG <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Dev</span>
+            Event <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Lens</span>
           </h1>
           <p className="text-gray-400 text-lg max-w-md mx-auto md:mx-0 leading-relaxed">
-            The enterprise-grade media vault for college communities. Access control, facial recognition, and infinite cloud galleries.
+            A media vault for college communities with access control, facial recognition, and infinite cloud galleries.
           </p>
         </div>
 
@@ -117,7 +112,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Hackathon Demo Quick Login */}
           <div className="border-t border-white/10 pt-6">
             <p className="text-xs text-gray-500 uppercase tracking-widest font-bold text-center mb-4">Judge Evaluation Hub</p>
             <div className="grid grid-cols-2 gap-3">

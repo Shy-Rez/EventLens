@@ -11,7 +11,7 @@ export default function AdvancedSearchPage() {
   const [media, setMedia] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("date"); // 🚀 FIXED: Now strictly uses 'date' or 'eventName'
+  const [sortBy, setSortBy] = useState("date");
   const [selectedMedia, setSelectedMedia] = useState<any>(null);
 
   const { role, isMounted } = useRole();
@@ -26,7 +26,6 @@ export default function AdvancedSearchPage() {
         const data = await res.json();
         
         if (data.success) {
-          // 🚀 FIXED: Inject the eventName into every media item so we can sort and display it!
           const extractedMedia = data.events.flatMap((event: any) => 
             event.albums?.flatMap((album: any) => 
               (album.media || []).map((m: any) => ({
@@ -49,14 +48,12 @@ export default function AdvancedSearchPage() {
     fetchAllMedia();
   }, [role]);
 
-  // 🚀 FIXED: The Deep AI Search & Sort Logic
   const filteredAndSortedMedia = media
     .filter(item => {
       if (!item) return false;
       if (searchQuery === "") return true;
       
       const query = searchQuery.toLowerCase();
-      // Search aggressively through AI tags, fallback to regular tags, or event name
       const tagsToSearch = item.aiTags || item.tags || [];
       const matchesTags = tagsToSearch.some((t: string) => t.toLowerCase().includes(query));
       const matchesEvent = item.eventName?.toLowerCase().includes(query);
@@ -64,11 +61,9 @@ export default function AdvancedSearchPage() {
       return matchesTags || matchesEvent;
     })
     .sort((a, b) => {
-      // 🚀 FIXED: Sorting strictly by Date Added or Event Name
       if (sortBy === "eventName") {
         return (a.eventName || "").localeCompare(b.eventName || "");
       }
-      // Default: Sort by Date Added (Newest First)
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
@@ -92,7 +87,6 @@ export default function AdvancedSearchPage() {
             </p>
           </header>
 
-          {/* Advanced Filter Controls Toolbar */}
           <div className="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-xl shadow-lg relative z-10">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               
@@ -109,7 +103,6 @@ export default function AdvancedSearchPage() {
 
               <div className="relative">
                 <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                {/* 🚀 FIXED: The Strict Dropdown for Date Added & Event Name */}
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
@@ -122,7 +115,6 @@ export default function AdvancedSearchPage() {
             </div>
           </div>
 
-          {/* Results Grid */}
           {isLoading ? (
             <div className="w-full h-64 flex flex-col items-center justify-center text-gray-500">
               <Loader2 className="w-10 h-10 animate-spin text-purple-500 mb-4" />
@@ -152,7 +144,6 @@ export default function AdvancedSearchPage() {
                     >
                       <img src={item.url} alt="Media" className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700" />
                       
-                      {/* 🚀 FIXED: Cinematic Dark Gradient revealing Event Name & glowing AI Tags */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-3">
                         <div className="flex flex-wrap gap-1">
                           {tags.slice(0, 3).map((tag: string, i: number) => (
