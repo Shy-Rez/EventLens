@@ -106,14 +106,12 @@ export default function MediaModal({ media, isOpen, onClose }: MediaModalProps) 
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8">
-        {/* Dark blurred background backdrop */}
         <motion.div 
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           onClick={onClose}
           className="absolute inset-0 bg-black/90 backdrop-blur-sm cursor-pointer"
         />
 
-        {/* Modal Container */}
         <motion.div 
           initial={{ scale: 0.95, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -124,7 +122,6 @@ export default function MediaModal({ media, isOpen, onClose }: MediaModalProps) 
             <X className="w-5 h-5" />
           </button>
 
-          {/* LEFT SIDE: The Image */}
           <div className="flex-1 bg-black flex items-center justify-center relative group">
             {media.type === "VIDEO" ? (
               <video src={media.url} controls className="max-w-full max-h-full object-contain" />
@@ -133,10 +130,8 @@ export default function MediaModal({ media, isOpen, onClose }: MediaModalProps) 
             )}
           </div>
 
-          {/* RIGHT SIDE: Social Sidebar */}
           <div className="w-full md:w-96 flex flex-col bg-[#0a0a0a] border-l border-white/10 h-full">
             
-            {/* Header */}
             <div className="p-4 border-b border-white/10 flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500" />
               <div>
@@ -144,8 +139,7 @@ export default function MediaModal({ media, isOpen, onClose }: MediaModalProps) 
                 <p className="text-gray-500 text-xs">{new Date(media.createdAt).toLocaleDateString()}</p>
               </div>
             </div>
-
-            {/* Comments Area (Scrollable) */}
+            
             <div className="flex-1 p-4 overflow-y-auto space-y-4">
               {comments.length === 0 ? (
                 <p className="text-gray-500 text-sm text-center mt-10">No comments yet. Be the first!</p>
