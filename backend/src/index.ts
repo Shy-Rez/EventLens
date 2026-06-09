@@ -790,8 +790,8 @@ app.post(['/api/search/face', '/api/ai-search/face'], async (req: any, res: any)
         // Calculate the mathematical distance between the selfie and the database photo
         const distance = euclideanDistance(vector, dbVector);
 
-        // face-api.js defines a strict match as a distance of < 0.6. 
-        if (distance < 0.6) {
+        // face-api.js defines a strict match as a distance of < 0.7. 
+        if (distance < 0.8) {
           // Convert distance (lower is better) to a confidence percentage for the UI
           const confidence = Math.max(0, (1 - distance) * 100).toFixed(1);
           
