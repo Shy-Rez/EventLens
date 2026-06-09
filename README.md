@@ -1,6 +1,6 @@
 # EventLens
 
-EventLens is an AI-powered Event & Media Management Platform designed for event teams, photographers, and clubs. It provides a centralized, full-stack SaaS system for managing events, organizing media, enabling real-time social interactions, and discovering content through edge processed facial recognition and advanced similarity search.
+EventLens is an AI powered Event & Media Management Platform designed for event teams, photographers, and clubs. It provides a centralized, full stack SaaS system for managing events, organizing media, enabling real-time social interactions, and discovering content through edge processed facial recognition and advanced similarity search.
 
 ## Overview
 
