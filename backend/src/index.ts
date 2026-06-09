@@ -764,7 +764,7 @@ app.post(['/api/search/face', '/api/ai-search/face'], async (req: any, res: any)
     return res.status(200).json({ 
       success: true, 
       message: `Found ${validMatches.length} true biometric matches.`, 
-      matches: validMatches.slice(0, 15) // Return top 15 best matches
+      matches: validMatches.slice(0, 15) 
     });
 
   } catch (error) {
