@@ -748,7 +748,7 @@ app.post(['/api/search/face', '/api/ai-search/face'], async (req: any, res: any)
         if (distance < bestDistance) bestDistance = distance;
       }
 
-      if (bestDistance < 0.8) {
+      if (bestDistance < 0.65) {
         const confidence = Math.max(0, (1 - bestDistance) * 100).toFixed(1);
         
         validMatches.push({
