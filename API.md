@@ -2,7 +2,7 @@
 
 Base URL: `https://eventlens-backend-cufi.onrender.com/api`
 Base URL (Local): `http://localhost:5000/api`
-Deployment: The backend runs on Node.js/Express, and the frontend is built and served through Next.js.
+Deployment: The backend runs on Node.js/Express, the frontend is built and served through Next.js.
 
 ## Authentication
 
