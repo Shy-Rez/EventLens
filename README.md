@@ -1,102 +1,166 @@
-# EventLens: Event & Media Management Platform
+# EventLens
 
-EventLens is a scalable, decoupled, full-stack SaaS application designed to revolutionize how event media is stored, shared, and discovered. Built with real-time event-driven interactions and Edge-to-Cloud AI processing, it solves the massive headache of sorting through thousands of event photos by finding exactly the photos you appear in.
+EventLens is an AI-powered Event & Media Management Platform designed for event teams, photographers, and clubs. It provides a centralized, full-stack SaaS system for managing events, organizing media, enabling real-time social interactions, and discovering content through edge processed facial recognition and advanced similarity search.
 
-## 🌟 Key Features
+## Overview
 
-### 🎭 AI Facial Recognition ("Find My Photos")
-- **Edge ML Processing:** Uses `face-api.js` directly in the browser to extract 2D arrays of 128-dimensional facial embeddings locally, completely preserving your raw selfie privacy.
-- **Cosine Similarity Engine:** Instantly scans tens of thousands of event photos using advanced Cosine Similarity math and dynamic distance thresholds to find every photo you are in—even across different lighting conditions and angles.
+During major events, thousands of photos and videos are generated and fragmented across storage systems, making it difficult for attendees to find themselves and for organizers to manage the media effectively.
 
-### 🔐 Streamlined Role-Based Access Control (RBAC)
-- **4-Tier Hierarchy:** Admin, Photographer, Club Member, and Viewer roles.
-- **Dynamic Access:** Granular control over who can create events, manage metadata, upload media in bulk, or interact socially.
-- **Merged Workflows:** Unified UI access ensuring Photographers and Club Members share identical upload/delete capabilities to streamline event collaboration.
+EventLens addresses this problem through:
 
-### ☁️ Smart Cloud Storage & Optimization
-- **Cloudinary Integration:** Chunked stream uploads handle massive 40MB+ videos and raw 4K images effortlessly without crashing the server.
-- **Dynamic WebP Delivery:** Automatically compresses raw media into optimized WebP formats on-the-fly, reducing CDN bandwidth by up to 80% without losing quality.
-- **Watermarking:** Automated dynamic watermarks applied to public downloads based on user roles and event context.
-
-### 💬 Real-Time Social Interactions
-- **Server-Sent Events (SSE):** Enjoy instant, real-time UI updates across the globe for likes, comments, and new uploads without needing to refresh the page.
-- **Live Notification Feed:** Chronological activity stream tracking global user interactions securely.
-
-### 🛡️ Security & Integrity
-- **Permissive Session Architecture:** Replaced strict JWT tokens with a modern session-existence check for smoother UX during continuous usage.
-- **Database Write Constraints:** Strict PostgreSQL foreign key constraints ensure ghost comments and orphan likes are impossible.
+- Event based media organization
+- Role based security and access control
+- Real time social engagement features
+- AI powered personalized photo retrieval
+- Scalable cloud architecture
+- Automatic media optimization and delivery
 
 ---
 
-## 🛠️ Technology Stack
+## Features
 
-**Frontend**
-- **Framework:** Next.js 16 (Turbopack) & React 19
-- **Styling:** Tailwind CSS v4 & Framer Motion for buttery-smooth micro-animations
-- **AI & ML:** `@vladmandic/face-api` (Browser-side tensor computation)
-- **Icons & UI:** Lucide React, Recharts, React Dropzone
+### Event Management
 
-**Backend**
-- **Framework:** Node.js, Express.js
-- **Database:** PostgreSQL (Neon/Supabase) via Prisma ORM (`@prisma/adapter-pg`)
-- **Cloud Storage:** Cloudinary SDK
-- **Security:** bcryptjs
+- Create, edit, and categorize events
+- Manage event metadata and cover images
+- Generate nested event wise public and private albums
+- Sort and filter events dynamically
+
+### Media Management
+
+- Upload high resolution images and large videos
+- Bulk multipart chunk streaming to prevent server overload
+- Automatic dynamic WebP delivery for bandwidth optimization
+- Real time upload progress and processing status
+
+### Authentication and Access Control
+
+Role-based access control managed via session persistence for:
+
+- Admin
+- Photographer
+- Club Member
+- Viewer
+
+Features include:
+
+- Secure login and registration flows
+- Seamless session management
+- Protected upload and administrative routes
+- Granular permissions for viewing private vs. public albums
+
+### Social Features
+
+- Interactive likes and comments
+- Media favoriting and sharing
+- User tagging capabilities
+- Real time notification streams via Server-Sent Events (SSE)
+- Global chronological activity feeds
+
+### AI Features
+
+#### Advanced Search
+
+Search media comprehensively by:
+
+- Event Name
+- AI-generated scene tags
+- Upload Date
+- Uploader Name
+
+#### Facial Recognition
+
+Users can seamlessly find themselves across thousands of photos:
+
+1. Extract multi dimensional facial embeddings locally in the browser to preserve raw privacy
+2. Process multi face 2D arrays against the PostgreSQL database
+3. Retrieve accurate matches using math and dynamic distance thresholds
+
+### Cloud Storage
+
+- Cloudinary CDN integration
+- Secure, scalable cloud asset management
+- Seamless background delivery and processing
+- Auto tagging and webhook synchronization
+
+### Watermarking
+
+Dynamic visual watermark generation during media downloads utilizing:
+
+- Club Name
+- Event Name
+- Requesting User's Role
+
+### Analytics
+
+- Administrative dashboard for event statistics
+- Global media storage utilization metrics
+- Compression ratio and CDN traffic bandwidth tracking
 
 ---
 
-## 🚀 Setup & Installation
+## Technology Stack
 
-### Prerequisites
-- Node.js (v20+)
-- PostgreSQL Database URL
-- Cloudinary Account (API Key, Secret, Cloud Name)
+### Frontend
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/Shy-Rez/EventLens.git
-cd EventLens
-```
+- React 
+- Next.js (Turbopack)
+- Tailwind CSS
+- Framer Motion
 
-### 2. Backend Setup
-```bash
-cd backend
-npm install
-```
-Create a `.env` file in the `backend` directory:
-```env
-DATABASE_URL="postgresql://user:password@localhost:5432/eventlens?schema=public"
-CLOUDINARY_CLOUD_NAME="your_cloud_name"
-CLOUDINARY_API_KEY="your_api_key"
-CLOUDINARY_API_SECRET="your_api_secret"
-```
-Run database migrations and start the server:
-```bash
-npx prisma db push
-npm run dev
-```
+### Backend
 
-### 3. Frontend Setup
-```bash
-cd ../frontend
-npm install
-```
-Start the Next.js development server:
-```bash
-npm run dev
-```
+- Node.js
+- Express.js
 
-The platform will be available at `http://localhost:3000`.
+### Database
+
+- PostgreSQL
+- Prisma ORM
+
+### Cloud Services
+
+- Cloudinary SDK
+
+### AI and Machine Learning
+
+- face-api.js (Edge-based Tensor Computation)
+- AWS Rekognition (Cloudinary Add-on)
+- Google Speech Intelligence (Cloudinary Add-on)
 
 ---
 
-## 📚 Documentation
+## Project Structure
 
-For deep-dives into the inner workings of EventLens, please refer to the following documentation files located in the repository root:
-
-- [**API Reference**](./API.md): Complete list of REST API endpoints, webhooks, and methods.
-- [**Architecture**](./ARCHITECTURE.md): System diagrams, AI pipelines, and data flow charts.
-- [**Database Schema**](./SCHEMA.md): Complete Entity Relationship Diagrams (ERD) and table configurations.
+```text
+EventLens/
+│
+├── API.md
+├── ARCHITECTURE.md
+├── SCHEMA.md
+│
+├── backend/
+│   ├── prisma/
+│   │   └── schema.prisma
+│   ├── src/
+│   │   └── index.ts
+│   └── package.json
+│
+├── frontend/
+│   ├── app/
+│   ├── components/
+│   ├── hooks/
+│   ├── public/
+│   └── package.json
+│
+└── README.md
+```
 
 ---
 
-*Built with ❤️ for rapid, scalable, and intelligent media delivery.*
+## Setup
+
+The deployed project can be accessed at [Render]https://eventlens-frontend-7ck7.onrender.com
+
+---
+
