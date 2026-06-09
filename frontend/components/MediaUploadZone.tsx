@@ -93,23 +93,35 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
       const file = validMediaFiles[i];
       if (file.type.startsWith('image/')) {
         try {
+          // CRITICAL MEMORY FIX: We MUST attach the image to the DOM at a safe width (800px).
+          // If we pass an unattached, unscaled 4K image directly to face-api, WebGL hits a hard memory limit 
+          // and silently crashes, causing the AI to skip the photo entirely.
           const img = document.createElement('img');
+          img.crossOrigin = "anonymous";
+          img.style.position = 'fixed';
+          img.style.top = '-9999px';
+          img.style.width = '800px'; 
+          img.style.height = 'auto';
           img.src = URL.createObjectURL(file);
           
-          // CRITICAL: Ensure the image is fully decoded by the browser before AI scans it
+          document.body.appendChild(img);
+          
           await new Promise((resolve) => {
             img.onload = resolve;
             img.onerror = resolve; // Continue even if one fails
           });
           
-          // Add a small artificial delay or just ensure the detection is fully awaited
           const detections = await faceapi.detectSingleFace(img)
             .withFaceLandmarks()
             .withFaceDescriptor();
+            
+          document.body.removeChild(img); // Clean up immediately!
           
           if (detections) {
             faceVectorsData[file.name] = Array.from(detections.descriptor);
             console.log(`[ML SUCCESS] AI identified face in ${file.name}`);
+          } else {
+            console.warn(`[ML WARNING] No human face detected in ${file.name}.`);
           }
         } catch (e) {
           console.error("AI Scan error on:", file.name);
