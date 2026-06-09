@@ -113,7 +113,7 @@ export default function LoginPage() {
           </form>
 
           <div className="border-t border-white/10 pt-6">
-            <p className="text-xs text-gray-500 uppercase tracking-widest font-bold text-center mb-4">Judge Evaluation Hub</p>
+            <p className="text-xs text-gray-500 uppercase tracking-widest font-bold text-center mb-4">Fast access panel</p>
             <div className="grid grid-cols-2 gap-3">
               <button onClick={(e) => handleLogin(e, "admin@club.edu")} className="flex items-center gap-2 p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition text-xs font-bold border border-red-500/20">
                 <Shield className="w-3.5 h-3.5" /> Admin
