@@ -5,6 +5,10 @@ import { useDropzone } from "react-dropzone";
 import { UploadCloud, File, X, CheckCircle2, Shield, AlertTriangle, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+type FaceDescriptorDetection = {
+  descriptor: ArrayLike<number>;
+};
+
 export default function MediaUploadZone({ eventId }: { eventId: string }) {
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -84,7 +88,7 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
     let uploadFailed = false;
 
     // SCAN FACES BEFORE UPLOAD
-    const faceVectorsData: Record<string, number[]> = {};
+    const faceVectorsData: Record<string, number[][]> = {};
     
     // 🚀 NEW: Add a status message to keep the UI informed
     setIsUploading(true); 
@@ -115,15 +119,15 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
             img.style.height = 'auto';
           }
           
-          const detections = await faceapi.detectSingleFace(img)
+          const detections = await faceapi.detectAllFaces(img)
             .withFaceLandmarks()
-            .withFaceDescriptor();
+            .withFaceDescriptors();
             
           document.body.removeChild(img); // Clean up immediately!
           
-          if (detections) {
-            faceVectorsData[file.name] = Array.from(detections.descriptor);
-            console.log(`[ML SUCCESS] AI identified face in ${file.name}`);
+          if (detections.length > 0) {
+            faceVectorsData[file.name] = detections.map((detection: FaceDescriptorDetection) => Array.from(detection.descriptor));
+            console.log(`[ML SUCCESS] AI identified ${detections.length} face(s) in ${file.name}`);
           } else {
             console.warn(`[ML WARNING] No human face detected in ${file.name}.`);
           }
@@ -144,7 +148,7 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
         batchFiles.forEach((file) => formData.append("media", file));
         
         // Use an ordered array for vectors to avoid filename mismatch bugs (e.g. spaces/special chars)
-        const batchVectors = batchFiles.map(file => faceVectorsData[file.name] || null);
+        const batchVectors = batchFiles.map(file => faceVectorsData[file.name] || []);
         
         formData.append("eventId", eventId);
         formData.append("faceVectors", JSON.stringify(batchVectors));

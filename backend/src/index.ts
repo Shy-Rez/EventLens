@@ -61,6 +61,19 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 } 
 });
 
+const isFaceVector = (value: any): value is number[] => {
+  return Array.isArray(value) && value.length === 128 && value.every((entry) => Number.isFinite(Number(entry)));
+};
+
+const normalizeFaceVectors = (value: any): number[][] => {
+  if (isFaceVector(value)) return [value.map(Number)];
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .filter(isFaceVector)
+    .map((vector) => vector.map(Number));
+};
+
 // ==========================================
 // 2. EVENT & ALBUM MANAGEMENT
 // ==========================================
@@ -263,10 +276,10 @@ app.post('/api/upload', upload.array('media', 500), async (req, res): Promise<an
 
       aiTags.push(hiddenHashTag);
 
-      if (faceVectors[currentFileIndex]) {
-        const vectorStr = `face_vector:${faceVectors[currentFileIndex].join(',')}`;
-        aiTags.push(vectorStr);
-      }
+      const vectorsForFile = normalizeFaceVectors(faceVectors[currentFileIndex]);
+      vectorsForFile.forEach((vector) => {
+        aiTags.push(`face_vector:${vector.join(',')}`);
+      });
 
       uploadedMediaData.push({
         url: uploadResult.secure_url,
@@ -767,9 +780,10 @@ app.post(['/api/search/face', '/api/ai-search/face'], async (req: any, res: any)
     let { vector } = req.body;
     if (typeof vector === 'string') vector = JSON.parse(vector);
 
-    if (!vector || !Array.isArray(vector) || vector.length !== 128) {
+    if (!isFaceVector(vector)) {
       return res.status(400).json({ success: false, message: "Invalid or missing 128D face vector payload." });
     }
+    vector = vector.map(Number);
 
     const allMedia = await prisma.media.findMany({
       include: { 
@@ -781,26 +795,29 @@ app.post(['/api/search/face', '/api/ai-search/face'], async (req: any, res: any)
     const validMatches: any[] = [];
 
     for (const media of allMedia) {
-      // Find the hidden biometric tag we saved during upload
-      const vectorTag = media.tags?.find((t: string) => t.startsWith('face_vector:'));
+      // Find every hidden biometric tag we saved during upload
+      const vectorTags = media.tags?.filter((t: string) => t.startsWith('face_vector:')) || [];
       
-      if (vectorTag) {
-        const dbVector = vectorTag.split(':')[1].split(',').map(Number);
-        
-        // Calculate the mathematical distance between the selfie and the database photo
-        const distance = euclideanDistance(vector, dbVector);
+      let bestDistance = Number.POSITIVE_INFINITY;
 
-        // face-api.js defines a strict match as a distance of < 0.7. 
-        if (distance < 0.8) {
-          // Convert distance (lower is better) to a confidence percentage for the UI
-          const confidence = Math.max(0, (1 - distance) * 100).toFixed(1);
-          
-          validMatches.push({
-            ...media,
-            distance: distance,
-            matchConfidence: confidence
-          });
-        }
+      for (const vectorTag of vectorTags) {
+        const dbVector = vectorTag.slice('face_vector:'.length).split(',').map(Number);
+        if (!isFaceVector(dbVector)) continue;
+
+        const distance = euclideanDistance(vector, dbVector);
+        if (distance < bestDistance) bestDistance = distance;
+      }
+
+      // face-api.js defines a strict match as a distance of < 0.7.
+      if (bestDistance < 0.8) {
+        // Convert distance (lower is better) to a confidence percentage for the UI
+        const confidence = Math.max(0, (1 - bestDistance) * 100).toFixed(1);
+        
+        validMatches.push({
+          ...media,
+          distance: bestDistance,
+          matchConfidence: confidence
+        });
       }
     }
 

@@ -8,6 +8,63 @@ import Sidebar from "@/components/Sidebar";
 import MediaLightbox from "@/components/MediaLightbox";
 import * as faceapi from 'face-api.js';
 
+const API_BASE_URL = "https://eventlens-backend-cufi.onrender.com/api";
+const FACE_MATCH_THRESHOLD = 0.8;
+
+const euclideanDistance = (vecA: number[], vecB: number[]) => {
+  let sum = 0;
+  for (let i = 0; i < vecA.length; i++) {
+    sum += Math.pow(vecA[i] - vecB[i], 2);
+  }
+  return Math.sqrt(sum);
+};
+
+const loadImageForScan = (src: string) => {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = document.createElement("img");
+    img.crossOrigin = "anonymous";
+    img.referrerPolicy = "no-referrer";
+    img.style.position = "fixed";
+    img.style.top = "-9999px";
+    img.style.left = "-9999px";
+    img.onload = () => resolve(img);
+    img.onerror = () => {
+      img.remove();
+      reject(new Error("Unable to load library image for face scan."));
+    };
+    document.body.appendChild(img);
+    img.src = src;
+  });
+};
+
+type MediaItem = {
+  id?: string;
+  url: string;
+  thumbnailUrl?: string;
+  type?: string;
+  tags?: string[];
+  distance?: number;
+  matchConfidence?: string;
+  [key: string]: unknown;
+};
+
+type AlbumWithMedia = {
+  media?: MediaItem[];
+};
+
+type EventWithAlbums = {
+  albums?: AlbumWithMedia[];
+};
+
+type EventsResponse = {
+  success?: boolean;
+  events?: EventWithAlbums[];
+};
+
+type FaceDescriptorDetection = {
+  descriptor: ArrayLike<number>;
+};
+
 export default function AIFaceFinderPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -15,10 +72,10 @@ export default function AIFaceFinderPage() {
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [statusMessage, setStatusMessage] = useState("Awaiting reference image...");
   
-  const [matchedMedia, setMatchedMedia] = useState<any[]>([]);
-  const [selectedLightboxMedia, setSelectedLightboxMedia] = useState<any>(null);
+  const [matchedMedia, setMatchedMedia] = useState<MediaItem[]>([]);
+  const [selectedLightboxMedia, setSelectedLightboxMedia] = useState<MediaItem | null>(null);
 
-  const { isMounted } = useRole();
+  const { isMounted, role } = useRole();
 
   // 🚀 LOAD NEURAL NETWORKS ON MOUNT
   // 🚀 LOAD NEURAL NETWORKS ON MOUNT (USING CLOUD CDN)
@@ -54,8 +111,76 @@ export default function AIFaceFinderPage() {
   };
 
   // 🚀 UPDATED: EXTRACT VECTOR AND SEND TO BACKEND API
+  const scanUnindexedLibraryMedia = async (referenceVector: number[], existingMatches: MediaItem[]) => {
+    try {
+      const eventsResponse = await fetch(`${API_BASE_URL}/events?role=${role.toUpperCase()}`);
+      const eventsData = await eventsResponse.json() as EventsResponse;
+
+      if (!eventsData.success) return [];
+
+      const existingIds = new Set(existingMatches.map((item) => item.id));
+      const allMedia = (eventsData.events || []).flatMap((event) =>
+        (event.albums || []).flatMap((album) => album.media || [])
+      );
+
+      const unindexedImages = allMedia.filter((item) => {
+        const hasServerVector = (item.tags || []).some((tag: string) => tag.startsWith("face_vector:"));
+        return item.type === "IMAGE" && item.url && !existingIds.has(item.id) && !hasServerVector;
+      });
+
+      if (unindexedImages.length === 0) return [];
+
+      const browserMatches: MediaItem[] = [];
+      setStatusMessage(`Checking ${unindexedImages.length} unindexed library image(s)...`);
+
+      for (let i = 0; i < unindexedImages.length; i++) {
+        const item = unindexedImages[i];
+        let img: HTMLImageElement | null = null;
+
+        try {
+          setStatusMessage(`Scanning unindexed library image ${i + 1} of ${unindexedImages.length}...`);
+          img = await loadImageForScan(item.thumbnailUrl || item.url);
+
+          if (img.naturalWidth > 900) {
+            img.style.width = "900px";
+            img.style.height = "auto";
+          }
+
+          const detections = await faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
+          let bestDistance = Number.POSITIVE_INFINITY;
+
+          detections.forEach((detection: FaceDescriptorDetection) => {
+            const distance = euclideanDistance(referenceVector, Array.from(detection.descriptor));
+            if (distance < bestDistance) bestDistance = distance;
+          });
+
+          if (bestDistance < FACE_MATCH_THRESHOLD) {
+            browserMatches.push({
+              ...item,
+              distance: bestDistance,
+              matchConfidence: Math.max(0, (1 - bestDistance) * 100).toFixed(1)
+            });
+          }
+        } catch (error) {
+          console.warn("Skipped unindexed image during browser face scan:", item.id, error);
+        } finally {
+          img?.remove();
+        }
+      }
+
+      return browserMatches;
+    } catch (error) {
+      console.warn("Browser fallback face scan failed:", error);
+      return [];
+    }
+  };
+
   const runRealVectorScan = async () => {
     if (!selectedImage) return;
+    if (!modelsLoaded) {
+      setStatusMessage("ERROR: AI models are still loading. Please wait a moment.");
+      return;
+    }
     setIsScanning(true);
     setStatusMessage("Extracting 128D facial embeddings from your selfie...");
 
@@ -75,17 +200,23 @@ export default function AIFaceFinderPage() {
       setStatusMessage("Selfie embedded successfully. Querying database matrix...");
 
       // 2. Send the 128D vector to your new Backend Route
-      const response = await fetch('https://eventlens-backend-cufi.onrender.com/api/search/face', {
+      const response = await fetch(`${API_BASE_URL}/search/face`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ vector: vectorArray })
       });
 
-      const data = await response.json();
+      const data = await response.json() as { success?: boolean; message?: string; matches?: MediaItem[] };
 
       if (data.success) {
-        setMatchedMedia(data.matches);
-        setStatusMessage(`Scan complete. ${data.message}`);
+        const serverMatches = data.matches || [];
+        const browserMatches = await scanUnindexedLibraryMedia(vectorArray, serverMatches);
+        const combinedMatches = [...serverMatches, ...browserMatches]
+          .sort((a, b) => (a.distance || 1) - (b.distance || 1))
+          .slice(0, 15);
+
+        setMatchedMedia(combinedMatches);
+        setStatusMessage(`Scan complete. Found ${combinedMatches.length} biometric match(es).`);
         setScanComplete(true);
       } else {
         setStatusMessage(`ERROR: ${data.message}`);
