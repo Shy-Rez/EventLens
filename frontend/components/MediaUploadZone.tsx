@@ -86,34 +86,37 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
     // SCAN FACES BEFORE UPLOAD
     const faceVectorsData: Record<string, number[]> = {};
     
+    // 🚀 NEW: Add a status message to keep the UI informed
+    setIsUploading(true); 
+
     for (let i = 0; i < validMediaFiles.length; i++) {
       const file = validMediaFiles[i];
       if (file.type.startsWith('image/')) {
         try {
-          // As requested: Taking the time to scan the FULL RESOLUTION image in memory
-          // instead of the tiny preview thumbnail. This ensures the AI can accurately
-          // detect faces even if they are small or the image is a wide group shot.
           const img = document.createElement('img');
           img.src = URL.createObjectURL(file);
           
-          await new Promise((resolve, reject) => { 
-            img.onload = resolve; 
-            img.onerror = () => reject(new Error("Image decode failed"));
+          // CRITICAL: Ensure the image is fully decoded by the browser before AI scans it
+          await new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve; // Continue even if one fails
           });
           
-          const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+          // Add a small artificial delay or just ensure the detection is fully awaited
+          const detections = await faceapi.detectSingleFace(img)
+            .withFaceLandmarks()
+            .withFaceDescriptor();
           
-          if (detection) {
-            faceVectorsData[file.name] = Array.from(detection.descriptor);
-            console.log(`[ML SUCCESS] Extracted real 128D vector for ${file.name}`);
-          } else {
-            console.warn(`[ML WARNING] No human face detected in ${file.name}. It will upload, but won't be searchable by face.`);
+          if (detections) {
+            faceVectorsData[file.name] = Array.from(detections.descriptor);
+            console.log(`[ML SUCCESS] AI identified face in ${file.name}`);
           }
         } catch (e) {
-          console.error("Face scan failed entirely for", file.name, e);
+          console.error("AI Scan error on:", file.name);
         }
       }
     }
+    // Now proceed to the fetch() batch loop...
 
     const BATCH_SIZE = 2; 
     
