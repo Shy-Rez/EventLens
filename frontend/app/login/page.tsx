@@ -62,7 +62,7 @@ export default function LoginPage() {
             <span className="text-white font-extrabold text-3xl">EL</span>
           </div>
           <h1 className="text-5xl font-extrabold text-white tracking-tight mb-4">
-            Event <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Lens</span>
+            Event<span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Lens</span>
           </h1>
           <p className="text-gray-400 text-lg max-w-md mx-auto md:mx-0 leading-relaxed">
             A media vault for college communities with access control, facial recognition, and infinite cloud galleries.
