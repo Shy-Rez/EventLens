@@ -236,7 +236,7 @@ app.post('/api/upload', upload.array('media', 500), async (req, res): Promise<an
             {
               folder: `event_platform/event_${eventId}`,
               resource_type: "image",
-              categorization: "google_tagging", 
+              categorization: "aws_rek_tagging", 
               auto_tagging: 0.6,
               moderation: "aws_rek" // Image Explicit/NSFW safety scanning
             },
@@ -750,27 +750,25 @@ app.get('/api/analytics', async (req, res): Promise<any> => {
 });
 
 // ==========================================
-// 8. REAL AI FACIAL SEARCH (COSINE SIMILARITY MATH)
+// 8. REAL AI FACIAL SEARCH (EUCLIDEAN DISTANCE MATH)
 // ==========================================
-const cosineSimilarity = (vecA: number[], vecB: number[]) => {
-  let dotProduct = 0;
-  let normA = 0;
-  let normB = 0;
+// 🚀 THE FIX: face-api.js is specifically trained using Euclidean Distance!
+const euclideanDistance = (vecA: number[], vecB: number[]) => {
+  let sum = 0;
   for (let i = 0; i < vecA.length; i++) {
-    dotProduct += vecA[i] * vecB[i];
-    normA += vecA[i] * vecA[i];
-    normB += vecB[i] * vecB[i];
+    sum += Math.pow(vecA[i] - vecB[i], 2);
   }
-  if (normA === 0 || normB === 0) return 0;
-  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+  return Math.sqrt(sum);
 };
 
 app.post(['/api/search/face', '/api/ai-search/face'], async (req: any, res: any): Promise<any> => {
   try {
-    const { vector } = req.body;
-    
+    // 🚀 THE FIX: Ensure we parse the vector whether it arrives as an Object or String from Vercel
+    let { vector } = req.body;
+    if (typeof vector === 'string') vector = JSON.parse(vector);
+
     if (!vector || !Array.isArray(vector) || vector.length !== 128) {
-      return res.status(400).json({ success: false, message: "Invalid 128D face vector." });
+      return res.status(400).json({ success: false, message: "Invalid or missing 128D face vector payload." });
     }
 
     const allMedia = await prisma.media.findMany({
@@ -783,36 +781,36 @@ app.post(['/api/search/face', '/api/ai-search/face'], async (req: any, res: any)
     const validMatches: any[] = [];
 
     for (const media of allMedia) {
+      // Find the hidden biometric tag we saved during upload
       const vectorTag = media.tags?.find((t: string) => t.startsWith('face_vector:'));
       
       if (vectorTag) {
         const dbVector = vectorTag.split(':')[1].split(',').map(Number);
         
-        // Use Cosine Similarity instead of Euclidean Distance
-        // Cosine Similarity is highly resilient to lighting and camera changes
-        const similarity = cosineSimilarity(vector, dbVector);
+        // Calculate the mathematical distance between the selfie and the database photo
+        const distance = euclideanDistance(vector, dbVector);
 
-        // A threshold of 0.75 is generous enough to catch matches in different lighting,
-        // but strict enough to filter out completely different people.
-        if (similarity >= 0.75) {
-          const confidence = (similarity * 100).toFixed(1);
+        // face-api.js defines a strict match as a distance of < 0.6. 
+        if (distance < 0.6) {
+          // Convert distance (lower is better) to a confidence percentage for the UI
+          const confidence = Math.max(0, (1 - distance) * 100).toFixed(1);
           
           validMatches.push({
             ...media,
-            similarity: similarity,
+            distance: distance,
             matchConfidence: confidence
           });
         }
       }
     }
 
-    // Sort by highest similarity first
-    validMatches.sort((a, b) => b.similarity - a.similarity);
+    // Sort by lowest distance first (closest mathematical match)
+    validMatches.sort((a, b) => a.distance - b.distance);
 
     return res.status(200).json({ 
       success: true, 
       message: `Found ${validMatches.length} true biometric matches.`, 
-      matches: validMatches.slice(0, 15) // Return up to 15 best matches
+      matches: validMatches.slice(0, 15) // Return top 15 best matches
     });
 
   } catch (error) {
