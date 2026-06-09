@@ -1,6 +1,6 @@
 # Architecture Diagram
 
-This document outlines the architecture, data flows, and infrastructure design for the **Event & Media Management Platform**. The system is built as a decoupled, full-stack SaaS application emphasizing scalable cloud storage, real time event driven interactions, and Edge-to-Cloud AI processing.
+This document outlines the architecture, data flows, and infrastructure design for the **Event & Media Management Platform**. The system is built as a decoupled, full-stack SaaS application emphasizing scalable cloud storage, real-time event-driven interactions, and AI processing.
 
 ## System Architecture
 
@@ -15,10 +15,10 @@ flowchart TB
 
   subgraph API["Backend API Layer (Node.js + Express)"]
     Gateway["Express Router & API Gateway"]
-    Auth["JWT / Failsafe Auth"]
+    Auth["Session Existence Check"]
     RBAC["Role-Based Middleware"]
     UploadController["Stream Chunker (Multer)"]
-    VectorEngine["Vector Math Engine (Euclidean Math)"]
+    VectorEngine["Vector Math Engine"]
     SSE_Emitter["EventEmitter (Server-Sent Events)"]
     Webhook["Cloudinary Webhook Listener"]
   end
@@ -31,7 +31,7 @@ flowchart TB
   subgraph Cloud["Cloud Infrastructure & AI"]
     Cloudinary["Cloudinary CDN & Asset Store"]
     AWSRek["AWS Rekognition (Moderation/Tags)"]
-    GoogleAI["Google Video Intelligence (Captions)"]
+    GoogleAI["Google AI (Speech-to-Text / Transcripts)"]
   end
 
   Web --> State
@@ -71,20 +71,20 @@ sequenceDiagram
 
   User->>Web: Drops 40MB Video
   Web->>API: POST /api/upload (Multipart Form)
-  API->>API: Validate RBAC & Parse Face Vectors
+  API->>API: Validate RBAC & Parse 2D Face Vector Arrays
   API->>Cloud: upload_chunked_stream (5MB Chunks)
   Cloud-->>API: Returns CDN secure_url immediately
-  API->>DB: Save Media Record (Without AI Captions)
+  API->>DB: Save Media Record & Array of Vectors
   API-->>Web: Return 201 Success (UI Updates)
   
   Note over Cloud,AI: Background AI Processing Begins
-  Cloud->>AI: Send Video to Google Intelligence
-  AI-->>Cloud: Returns Scene Description & .transcript
+  Cloud->>AI: Send Video to Google Intelligence (Speech)
+  AI-->>Cloud: Generates async .transcript file
   
-  Cloud->>API: POST /api/webhooks/cloudinary (Webhook)
-  API->>DB: Update aiCaption & transcriptPublicId
+  Cloud->>API: POST /api/webhooks/cloudinary (Webhook Callback)
+  API->>DB: Parses transcription text and updates aiCaption
   API->>SSE: Emit UI Refresh Event
-  SSE-->>Web: Update Gallery with Captions & VTT Subtitles
+  SSE-->>Web: Update Gallery with Captions
 ```
 
 ## Core Request & Data Flow
@@ -98,13 +98,13 @@ sequenceDiagram
   end
 
   Browser --> API["Express API"]
-  API --> Auth["Auth / Session Check"]
+  API --> Auth["Session Persistence Validation"]
   Auth --> RBAC["Role Middleware"]
   
   RBAC --> FeatureBranch{Feature routing}
   
   FeatureBranch -->|Social| Social["Like / Comment"]
-  FeatureBranch -->|Discovery| Search["Euclidean Vector Search"]
+  FeatureBranch -->|Discovery| Search["Vector Similarity Search"]
   FeatureBranch -->|Delivery| Transform["URL Transformations"]
   
   Social --> DB["PostgreSQL"]
@@ -121,14 +121,6 @@ sequenceDiagram
 | Role | Capabilities |
 | --- | --- |
 | Admin | Create/edit events, manage metadata, change user roles globally, full access to all private and public media, moderate interactions. |
-| Photographer | Upload media in bulk, bypass public/private restrictions, view assigned private albums, auto apply watermarks. |
-| Club Member | View club only private albums, interact socially, use "Find My Photos" AI search. |
+| Photographer | Upload media in bulk, delete media, bypass public/private restrictions, view assigned private albums, auto apply watermarks. |
+| Club Member | View club-only private albums, interact socially, upload media, delete media, use "Find My Photos" AI search. |
 | Viewer | Default tier. View public albums only, share public links, download strictly watermarked media. |
-
-
-
-
-
-
-
-

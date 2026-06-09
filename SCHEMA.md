@@ -14,7 +14,7 @@ erDiagram
         String avatarUrl
         Role role
         String referenceSelfie
-        FloatArray faceEmbedding "128D Vector"
+        FloatArray faceEmbedding "Dynamic Vector Array"
         DateTime createdAt
     }
     EVENT {
@@ -93,15 +93,14 @@ erDiagram
 
 | Table | Purpose |
 | --- | --- |
-| `User` | Stores account identity, RBAC roles and authorization credentials |
+| `User` | Stores account identity, RBAC roles, and authorization credentials. Includes array of face embeddings for optimized Similarity matching. |
 | `Event` | A workspace container storing event metadata such as name, description, date, and category. |
 | `Album` | Event-wise album container with Public/Private toggles to restrict access for unauthenticated viewers. |
-| `Media` | Stores asset URLs, optimization thumbnails, media types, AI-generated captions and AI tags. |
-| `FaceMatch` | Face detection results, caches AI facial recognition hits and confidence scores to prevent recalculation. |
-| `Comment` | Social comment records containing the username for immediate, join free UI rendering. |
+| `Media` | Stores asset URLs, optimization thumbnails, media types, AI-generated captions, and AI tags. |
+| `FaceMatch` | Caches AI facial recognition hits and confidence scores to prevent recalculation. |
+| `Comment` | Social comment records containing the username for immediate, join-free UI rendering. |
 | `Like` | Social interaction tracking with strict constraints to prevent duplicate likes from the same user. |
-| `Favourite` | Stores the relationship between users and media items they have marked as favourites. |
-| `Notification` | Realtime notification records for likes, comments, tags, uploads, and album updates. |
+| `Notification` | Real-time notification records for likes, comments, tags, uploads, and album updates. |
 
 ## Enums
 
@@ -119,4 +118,4 @@ enum MediaType {
 }
 ```
 
-Find whole prisma schema at: [`prisma/schema.prisma`](../prisma/schema.prisma).
+Find the source Prisma schema at: [`backend/prisma/schema.prisma`](./backend/prisma/schema.prisma).

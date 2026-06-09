@@ -1,6 +1,7 @@
 # API Documentation
 
-Base URL: `http://localhost:5000/api`
+Base URL: `https://eventlens-backend-cufi.onrender.com/api`
+Base URL (Local): `http://localhost:5000/api`
 Deployment: The backend runs on Node.js/Express, and the frontend is built and served through Next.js.
 
 ## Authentication
@@ -18,25 +19,26 @@ Deployment: The backend runs on Node.js/Express, and the frontend is built and s
 ## Media & Uploads
 
 - `GET /api/events/:eventId/media` fetches all media assets aggregated across an event's albums.
-- `POST /api/uploads` accepts multipart/form data. Streams files to Cloudinary, runs AWS Rekognition moderation, generates AI tags, and links to Prisma.
+- `POST /api/upload` accepts multipart/form data. Streams files to Cloudinary, extracts arrays of face-embeddings for Postgres indexing, and generates AI tags.
+- `POST /api/webhooks/cloudinary` receives asynchronous callbacks from Cloudinary's AI services (e.g., `google_speech`) to update the database with transcription data.
 - `DELETE /api/media/:mediaId` performs hard-delete on both the database and the remote Cloudinary asset.
 
 ## Social & Interactions
 
 - `GET /api/media/:mediaId/interactions` returns comment threads and total like counts.
-- `POST /api/media/:mediaId/like` toggles likes and emits a real time notification to the target user.
+- `POST /api/media/:mediaId/like` toggles likes and emits a real-time notification to the target user.
 - `POST /api/media/:mediaId/comment` saves comments with user metadata and triggers notification events.
 - `GET /api/activity` returns a combined, chronological feed of media uploads and user join events.
 
-## Real Time Notifications
+## Real-Time Notifications
 
-- `GET /api/notifications/stream/:userId` provides a persistent Server Sent Events (SSE) stream for instant UI updates.
+- `GET /api/notifications/stream/:userId` provides a Server-Sent Events (SSE) stream for instant UI updates.
 - `GET /api/notifications/:userId` fetches historical notifications for a specific user.
 
 ## AI
 
 - `GET /api/search/advanced` runs multi-criteria queries (eventName, tag, date, uploader) against the indexed database.
-- `POST /api/search/face` takes a multi dimensional float vector and returns matching media using Euclidean distance calculations.
+- `POST /api/search/face`  takes a multi-dimensional float vector and returns matching media using calculations and dynamic scaling.
 
 ## Admin And Analytics
 

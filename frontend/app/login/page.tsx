@@ -59,7 +59,7 @@ export default function LoginPage() {
         
         <div className="flex-1 text-center md:text-left">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-500 to-purple-600 mb-6 flex items-center justify-center mx-auto md:mx-0 shadow-lg shadow-blue-500/30">
-            <span className="text-white font-extrabold text-3xl">C</span>
+            <span className="text-white font-extrabold text-3xl">EL</span>
           </div>
           <h1 className="text-5xl font-extrabold text-white tracking-tight mb-4">
             Event <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Lens</span>
