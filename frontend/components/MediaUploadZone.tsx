@@ -93,23 +93,27 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
       const file = validMediaFiles[i];
       if (file.type.startsWith('image/')) {
         try {
-          // CRITICAL MEMORY FIX: We MUST attach the image to the DOM at a safe width (800px).
-          // If we pass an unattached, unscaled 4K image directly to face-api, WebGL hits a hard memory limit 
-          // and silently crashes, causing the AI to skip the photo entirely.
+          // CRITICAL MEMORY FIX: We MUST attach the image to the DOM.
+          // If the image is massive (e.g. 4K), WebGL crashes. We must scale it down.
+          // If the image is tiny (e.g. 200x200), we must NOT scale it up, or it gets too blurry to scan!
           const img = document.createElement('img');
           img.crossOrigin = "anonymous";
           img.style.position = 'fixed';
           img.style.top = '-9999px';
-          img.style.width = '800px'; 
-          img.style.height = 'auto';
           img.src = URL.createObjectURL(file);
           
           document.body.appendChild(img);
           
           await new Promise((resolve) => {
             img.onload = resolve;
-            img.onerror = resolve; // Continue even if one fails
+            img.onerror = resolve; 
           });
+          
+          // Only constrain massive images to prevent WebGL crashes. Leave small images alone!
+          if (img.naturalWidth > 800) {
+            img.style.width = '800px'; 
+            img.style.height = 'auto';
+          }
           
           const detections = await faceapi.detectSingleFace(img)
             .withFaceLandmarks()
