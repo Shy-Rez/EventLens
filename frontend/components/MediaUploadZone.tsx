@@ -97,7 +97,7 @@ export default function MediaUploadZone({ eventId }: { eventId: string }) {
           // If the image is massive (e.g. 4K), WebGL crashes. We must scale it down.
           // If the image is tiny (e.g. 200x200), we must NOT scale it up, or it gets too blurry to scan!
           const img = document.createElement('img');
-          img.crossOrigin = "anonymous";
+          // DO NOT USE crossOrigin="anonymous" on blob URLs, it causes CORS failures in Chrome!
           img.style.position = 'fixed';
           img.style.top = '-9999px';
           img.src = URL.createObjectURL(file);
